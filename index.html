@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AromaLab</title>
+<meta name="description" content="精油を選んで、まぜて、香らせる。自分と家族のための香りの工房。">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0e1b19">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AromaLab">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@300;400;500&family=Shippori+Antique+B1&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* layout: one quiet column on a pine-ink ground; colour comes only from the oils (bottles, liquid, mist). The bottle is the one loud element. */
+:root{
+  --ground:#e7ece8;--paper:#f6f8f4;--sunk:#dbe3dd;--line:#c4cfc8;--ink:#15221e;--ink2:#46564f;--ink3:#58665f;
+  --glass:#8f5712;--glass-deep:#5c3604;--glass-ink:#fff8ea;--glass-soft:#efe0c6;--amber:#c98a34;
+  --ok:#2c7a52;--warn:#a2600a;--bad:#ad3a2f;
+  --gA:#12806f;--gB:#4f8a2f;--gC:#a87512;--gX:#ad3a2f;--gN:#74837c;
+  --display:'Shippori Antique B1','Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;
+  --body:'Zen Kaku Gothic New','Hiragino Sans','Yu Gothic','Meiryo',sans-serif;
+  --spring:cubic-bezier(.3,1.45,.45,1);--out:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0e1b19;--paper:#162724;--sunk:#0a1513;--line:#2a403b;--ink:#e6ede8;--ink2:#a9b8b1;--ink3:#8c9d96;
+  --glass:#e2a552;--glass-deep:#9a6a22;--glass-ink:#1c1304;--glass-soft:#33280f;--amber:#d99a45;
+  --ok:#62c594;--warn:#e3a549;--bad:#ec7468;
+  --gA:#5fd3bf;--gB:#93cf6a;--gC:#e3b04a;--gX:#ec7468;--gN:#73857e;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#0e1b19;--paper:#162724;--sunk:#0a1513;--line:#2a403b;--ink:#e6ede8;--ink2:#a9b8b1;--ink3:#8c9d96;
+  --glass:#e2a552;--glass-deep:#9a6a22;--glass-ink:#1c1304;--glass-soft:#33280f;--amber:#d99a45;
+  --ok:#62c594;--warn:#e3a549;--bad:#ec7468;
+  --gA:#5fd3bf;--gB:#93cf6a;--gC:#e3b04a;--gX:#ec7468;--gN:#73857e;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--ground)}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;font-feature-settings:"palt"}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0;text-align:inherit}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--glass);outline-offset:2px;border-radius:6px}
+.app{position:relative;z-index:1;max-width:540px;margin:0 auto;padding-inline:18px;padding-block:0 calc(104px + env(safe-area-inset-bottom,0px))}
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;padding-block:18px 6px}
+h1{margin:0;font-family:var(--display);font-weight:400;font-size:28px;letter-spacing:.06em;line-height:1.2}
+.brand{font-family:'Cormorant Garamond','Shippori Antique B1',Georgia,serif;font-weight:500;letter-spacing:.07em;font-size:30px;white-space:nowrap}
+.brand .o{font-family:var(--body);font-weight:400;color:var(--amber);font-size:.62em;letter-spacing:0;margin-inline:.35em;vertical-align:.12em}
+.sub{color:var(--ink2);font-size:13px;margin:0 0 14px}
+.iconbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;transition:transform .18s var(--spring),background .15s}
+.iconbtn:active{transform:scale(.88);background:var(--sunk)}
+/* shelf (hero) */
+.shelf{background:var(--paper);border-radius:18px;padding:16px 14px 12px;margin-bottom:12px}
+.shelf h2{margin:0;font-family:var(--display);font-weight:400;font-size:17px;letter-spacing:.04em}
+.shelf p{margin:2px 0 0;font-size:12.5px;color:var(--ink2)}
+.shelf-row{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;border-bottom:3px solid var(--ink);margin:12px 2px 0;padding:0 2px}
+.sb{display:flex;flex-direction:column;align-items:center;gap:0;transition:transform .2s var(--spring)}
+.sb:active{transform:translateY(-6px) rotate(-2deg)}
+.sb svg{width:44px;height:76px;display:block;overflow:visible}
+.sb .liq{transform-box:fill-box;transform-origin:50% 100%;animation:fillUp .8s var(--out) both;animation-delay:calc(var(--i)*110ms + 150ms)}
+@keyframes fillUp{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.shelf-names{display:grid;grid-template-columns:repeat(5,1fr);margin:6px 2px 0;font-size:12px;line-height:1.3;color:var(--ink2);text-align:center}
+.shelf-names span{padding:0 1px;word-break:keep-all;overflow-wrap:normal;letter-spacing:-.03em;white-space:nowrap}
+.shelf-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}
+.shelf-foot span{font-size:12.5px;color:var(--ink2)}
+.link{color:var(--glass);font-weight:700;font-size:13px;border-bottom:1px solid currentColor;padding-bottom:1px;white-space:nowrap}
+/* settings summary */
+.safebar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;width:100%;padding:8px 2px;margin:0 0 4px;font-size:12.5px;color:var(--ink2)}
+.safebar .pill{font-size:12px;padding:1px 9px;border-radius:99px;background:var(--sunk);color:var(--ink)}
+/* headings */
+.glabel{font-family:var(--display);font-size:16px;letter-spacing:.04em;color:var(--ink);margin:26px 0 6px}
+.glabel small{font-family:var(--body);font-size:12px;color:var(--ink3);margin-left:8px;letter-spacing:0}
+.note{font-size:12.5px;color:var(--ink2);line-height:1.7}
+.legend{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin:8px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+/* grade stamp */
+.sym{font-style:normal;font-family:var(--display);display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;font-size:14px;line-height:1;border:1.5px solid currentColor;flex:none;color:var(--gN)}
+.sym.A{color:var(--gA);box-shadow:0 0 0 2px var(--ground),0 0 0 3px currentColor}.sym.B,.sym.V{color:var(--gB)}.sym.C,.sym.D,.sym.W{color:var(--gC)}.sym.X{color:var(--gX)}.sym.N,.sym.U{color:var(--gN)}
+.legend .sym{width:18px;height:18px;font-size:12px;box-shadow:none}
+/* purpose rows */
+.plist{border-top:1px solid var(--line)}
+.prow{display:flex;align-items:center;gap:12px;width:100%;padding:11px 4px;border-bottom:1px solid var(--line);transition:background .15s,transform .18s var(--spring)}
+.prow:active{background:var(--paper);transform:scale(.985)}
+.prow .mb{width:22px;height:36px;flex:none}
+.prow .pt{flex:1;min-width:0}
+.prow b{display:block;font-weight:700;font-size:15px;line-height:1.4}
+.prow small{display:block;font-size:12px;color:var(--ink3);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* oil rows */
+.row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 4px;border-bottom:1px solid var(--line);transition:background .15s,transform .18s var(--spring)}
+.row:active{background:var(--paper);transform:scale(.985)}
+.drop{width:14px;height:14px;border-radius:0 50% 50% 50%;transform:rotate(45deg);flex:none;margin:0 4px 0 6px}
+.row .nm{font-weight:700;line-height:1.4}
+.row .ds{font-size:12px;color:var(--ink2);line-height:1.5}
+.row .mid{flex:1;min-width:0}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--warn);display:inline-block;margin-left:6px;vertical-align:middle}
+.dot.avoid{background:var(--bad)}.dot.unknown{background:var(--ink3)}
+.tag{display:inline-block;font-size:12px;font-weight:500;padding:0 7px;border-radius:99px;border:1px solid var(--line);color:var(--ink2);margin-left:6px;white-space:nowrap;line-height:1.7;vertical-align:middle}
+.tag.v{border-color:var(--gB);color:var(--gB)}.tag.w{border-color:var(--gC);color:var(--gC)}
+.ef{display:flex;flex-wrap:wrap;gap:0 10px;font-size:12.5px;font-weight:500;line-height:1.6;margin:1px 0}
+.ef .h{color:var(--gB)}.ef .w{color:var(--gC)}.ef.none{color:var(--ink3);font-weight:400}
+.card h3 .tag{font-weight:400}
+/* chips, inputs, buttons */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chip{padding:5px 13px;border-radius:99px;border:1px solid var(--line);font-size:13px;transition:transform .18s var(--spring),background .15s,color .15s}
+.chip{box-shadow:0 2px 0 var(--line)}
+.chip:active{transform:translateY(2px);box-shadow:0 0 0 var(--line)}
+.chip.on{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.search{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--paper);outline:none;transition:border-color .15s}
+.search:focus{border-color:var(--glass)}
+select.search{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink3) 50%),linear-gradient(135deg,var(--ink3) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
+textarea.search{min-height:56px;resize:vertical}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border-radius:99px;background:var(--glass);color:var(--glass-ink);font-weight:700;font-size:14px;transition:transform .18s var(--spring),filter .12s}
+.btn{box-shadow:0 3px 0 var(--glass-deep);transition:transform .09s,box-shadow .09s}
+.btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--glass-deep)}
+.btn.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line);box-shadow:0 3px 0 var(--line)}
+.btn.ghost:active{box-shadow:0 0 0 var(--line)}
+.btn.sm{padding:6px 14px;font-size:13px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.card{background:var(--paper);border-radius:14px;padding:14px;margin:10px 0}
+.card h3{margin:0 0 4px;font-size:14px}
+.warn{color:var(--warn);font-size:12.5px}
+.empty{text-align:center;color:var(--ink3);padding:28px 8px;font-size:13px}
+details{margin:8px 0}summary{cursor:pointer;color:var(--ink2);font-size:13px}
+.row .ds{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dg{display:inline-flex;gap:2px;margin-right:8px;vertical-align:middle}
+.dg i{width:7px;height:7px;border-radius:0 50% 50% 50%;transform:rotate(45deg);display:block}
+.aura{position:relative;height:88px;border-radius:16px;overflow:hidden;margin-top:12px;background:color-mix(in srgb,var(--c) 14%,var(--paper))}
+.aura .au1,.aura .au2{position:absolute;width:130px;height:130px;border-radius:50%;background:var(--c);filter:blur(22px);opacity:.6;animation:drift 7s ease-in-out infinite alternate}
+.aura .au1{left:-20px;top:-40px}.aura .au2{right:-10px;bottom:-60px;animation-duration:9s;animation-direction:alternate-reverse;opacity:.45}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(46px,18px) scale(1.25)}}
+.aura-t{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 18px;line-height:1.5}
+.aura-t b{font-family:var(--display);font-weight:400;font-size:18px;letter-spacing:.04em}
+.aura-t span{font-size:12.5px;color:var(--ink2)}
+.str i{display:inline-block;width:34px;height:8px;vertical-align:middle;margin-left:4px;border-radius:4px;background:linear-gradient(90deg,var(--ink) 66%,var(--line) 66%)}
+.str i.s3{background:var(--ink)}
+/* recipe label */
+.rc{position:relative;background:var(--paper);border-radius:6px 16px 16px 6px;padding:14px 14px 14px 52px;margin:10px 0;border-left:1px dashed var(--line)}
+.rc .mbw{position:absolute;left:14px;top:16px;width:24px;height:40px}
+.rc .k{font-size:12px;color:var(--glass);font-weight:700}
+.rc h4{margin:0 0 6px;font-family:var(--display);font-weight:400;font-size:17px;line-height:1.4;letter-spacing:.02em;text-wrap:balance}
+.it{width:100%;display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line)}
+.it .nm{flex:1;min-width:0;font-weight:700;font-size:14px}
+.it .nm small{display:block;font-weight:400;font-size:12px;color:var(--ink3)}
+.it .dr{font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.it .dr small{font-family:var(--body);font-size:12px;color:var(--ink3);margin-left:2px}
+.parts{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}
+.part{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:1px 10px;font-size:12.5px}
+.part i{width:8px;height:8px;border-radius:50%}
+.stars{display:inline-flex;gap:2px}
+.stars button{font-size:24px;line-height:1;color:var(--line);padding:2px;transition:color .15s}
+.stars button.on{color:var(--amber)}
+.stars button.pop{animation:starPop .45s var(--spring)}
+@keyframes starPop{0%{transform:scale(.4) rotate(-30deg)}100%{transform:none}}
+/* bottle bench */
+.fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;border-radius:18px;z-index:2}
+.bwrapc canvas{touch-action:pan-y;cursor:grab}
+.bench{position:relative;display:block;background:var(--paper);border-radius:22px;padding:12px 14px 16px}
+.bwrapc{position:relative;width:190px}
+.bwrapc canvas{width:100%;aspect-ratio:140/220;height:auto;display:block}
+.bwrapc .hint{position:absolute;left:0;right:0;top:56%;text-align:center;font-size:12px;color:var(--ink3);pointer-events:none}
+.total{font-family:var(--display);font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.total small{font-family:var(--body);font-size:13px;color:var(--ink2);margin-left:4px}
+.total.bump{animation:bump .35s var(--spring)}
+@keyframes bump{0%{transform:scale(1.25)}100%{transform:none}}
+.mtrack{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden;margin:8px 0}
+.mtrack i{display:block;height:100%;background:var(--amber);border-radius:3px;transition:width .5s var(--spring),background .2s}
+.slots{grid-column:1/-1}
+.slot{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line)}
+.slot .n{flex:1;min-width:0;font-weight:700;font-size:14px}
+.slot .n small{display:block;font-weight:400;color:var(--ink3);font-size:12px}
+.step{display:flex;align-items:center;border:1px solid var(--line);border-radius:99px}
+.step button{width:34px;height:34px;font-size:18px;border-radius:50%;display:grid;place-items:center;transition:background .12s,transform .18s var(--spring)}
+.step button:active{background:var(--glass-soft);transform:scale(.82)}
+.step button{touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.step span{width:24px;text-align:center;font-family:var(--display);font-size:17px}
+#saveR{flex:none;white-space:nowrap}
+/* views + tabs */
+.view{display:none}.view.active{display:block;animation:viewIn .22s ease-out}
+@keyframes viewIn{from{opacity:0}to{opacity:1}}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));z-index:20;pointer-events:none}
+.tabs .in{pointer-events:auto;display:grid;grid-template-columns:repeat(5,1fr);width:100%;max-width:420px;position:relative;background:color-mix(in srgb,var(--paper) 95%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:99px;padding:4px;box-shadow:0 8px 28px color-mix(in srgb,var(--ink) 16%,transparent)}
+.tabs .pill{position:absolute;left:4px;top:4px;bottom:4px;width:calc((100% - 8px)/5);border-radius:99px;background:var(--ink);transition:transform .38s var(--spring);z-index:0}
+.tab{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 0 4px;font-size:12px;color:var(--ink2);transition:color .2s}
+.tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s var(--spring)}
+.tab.on{color:var(--ground)}
+.tab.on svg{transform:translateY(-1px) scale(1.08)}
+.tab:active svg{transform:scale(.85)}
+/* sheet */
+.backdrop{position:fixed;inset:0;background:color-mix(in srgb,var(--sunk) 70%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}
+.backdrop.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:92vh;max-height:92dvh;background:var(--ground);border-radius:24px 24px 0 0;transform:translateY(105%);transition:transform .42s cubic-bezier(.25,1.1,.35,1);z-index:50;display:flex;flex-direction:column;max-width:540px;margin:0 auto;box-shadow:0 -10px 40px color-mix(in srgb,var(--ink) 22%,transparent)}
+.sheet.on{transform:none}
+.sheet .grab{padding:10px 0 6px;touch-action:none;cursor:grab}
+.sheet .grab i{display:block;width:38px;height:4px;border-radius:4px;background:var(--line);margin:0 auto}
+.sheet .body{overflow:auto;padding:4px 18px calc(28px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+.shead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.shead h2{margin:0;font-family:var(--display);font-weight:400;font-size:22px;line-height:1.35;letter-spacing:.03em;text-wrap:balance}
+.sci{font-size:12px;color:var(--ink3);font-style:italic}
+.verdict{display:flex;gap:12px;align-items:flex-start;margin:14px 0 4px}
+.verdict b{font-size:13.5px}
+.stabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--sunk);padding:3px;border-radius:99px;margin:14px 0;position:relative}
+.stab{padding:6px 0;border-radius:99px;font-size:13px;color:var(--ink2);text-align:center;transition:background .2s,color .2s}
+.stab.on{background:var(--paper);color:var(--ink);font-weight:700}
+.kv{display:grid;grid-template-columns:92px 1fr;gap:8px 10px;font-size:13.5px;margin:0}
+.kv dt{color:var(--ink3)}.kv dd{margin:0}
+.s-ok{color:var(--ok)}.s-caution{color:var(--warn)}.s-avoid{color:var(--bad)}.s-unknown{color:var(--ink3)}
+.ev{padding:10px 0;border-top:1px solid var(--line)}
+.ev b{font-size:13px}
+.ev .meta{font-size:12px;color:var(--ink3)}
+.ev.bad b{color:var(--bad)}
+.ev a{color:var(--glass);font-size:12.5px;font-weight:700}
+/* breath */
+.mistw{position:relative;display:grid;place-items:center;height:280px}
+.mistw canvas{width:280px;height:280px;max-width:100%}
+.mistw .lbl{position:absolute;text-align:center;font-family:var(--display);font-size:22px;letter-spacing:.08em;pointer-events:none}
+.mistw .lbl small{display:block;font-family:var(--body);font-size:13px;color:var(--ink2);letter-spacing:0;font-variant-numeric:tabular-nums}
+/* settings */
+.sw-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.sw-row:last-child{border:0}
+.switch{width:48px;height:28px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);position:relative;transition:background .2s;flex:none}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:var(--ink3);transition:transform .3s var(--spring),background .2s}
+.switch.on{background:var(--glass-soft);border-color:var(--amber)}
+.switch.on::after{transform:translateX(20px);background:var(--amber)}
+.fam{display:flex;align-items:center;gap:12px;width:100%;padding:9px 4px;border-bottom:1px solid var(--line);transition:opacity .2s,transform .18s var(--spring)}
+.fam:active{transform:scale(.985)}
+.fam .t{flex:1;line-height:1.4}.fam .t small{display:block;color:var(--ink3);font-size:12px}
+.fam .st{font-size:12px;color:var(--ink3)}
+.fam.off{opacity:.5}.fam.off .t{text-decoration:line-through}.fam.off .st{color:var(--bad)}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px) scale(.96);background:var(--ink);color:var(--ground);padding:10px 18px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s,transform .35s var(--spring);z-index:60;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* v6: stage + puff + mini shelf + jelly */
+.stage{position:relative;display:flex;justify-content:center;min-height:300px}
+.stage .tot{position:absolute;left:0;top:8px;z-index:3;pointer-events:none}
+.stage .tot .note{margin-top:2px}
+.puff{position:absolute;right:0;bottom:10px;width:78px;height:78px;border-radius:50%;background:var(--glass);color:var(--glass-ink);box-shadow:0 5px 0 var(--glass-deep),0 12px 20px rgba(0,0,0,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:12px;font-weight:700;z-index:3;touch-action:manipulation}
+.puff svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ctr{text-align:center;margin:4px 0 0}
+#meter{margin:8px 0 0}
+.glab2{font-size:12.5px;color:var(--ink2);margin:12px 0 0}.glab2 small{color:var(--ink3);margin-left:8px}
+.mshelf{display:flex;gap:4px;overflow-x:auto;padding:14px 2px 8px;margin:0 -4px 8px;border-bottom:3px solid var(--ink);-webkit-overflow-scrolling:touch;touch-action:pan-x;scrollbar-width:none}
+.mshelf::-webkit-scrollbar{display:none}
+.mb{flex:none;width:76px;display:flex;flex-direction:column;align-items:center;position:relative;user-select:none;-webkit-user-select:none;touch-action:pan-x;padding:0 0 2px}
+.mb svg{width:44px;height:64px;display:block;overflow:visible}
+.mb .nm{font-size:12px;line-height:1.25;color:var(--ink2);margin-top:3px;white-space:nowrap;max-width:76px;overflow:hidden;text-overflow:ellipsis;word-break:keep-all;letter-spacing:-.02em}
+.mb.no svg>path{stroke-dasharray:3.5 3;stroke:var(--ink3)}
+.mb.in .nm{color:var(--ink);font-weight:700}
+.mb .bd{position:absolute;top:-6px;right:7px;min-width:21px;height:21px;border-radius:11px;background:var(--ink);color:var(--ground);font-size:12px;font-weight:700;display:grid;place-items:center;font-style:normal;padding:0 5px;transform:scale(0);transition:transform .35s var(--spring);font-variant-numeric:tabular-nums}
+.mb .bd.on{transform:scale(1)}
+.fly{position:fixed;left:0;top:0;width:10px;height:13px;border-radius:50% 50% 50% 50%/62% 62% 38% 38%;z-index:70;pointer-events:none;box-shadow:0 0 8px rgba(255,255,255,.35)}
+button,.prow,.row,.fam,summary{will-change:auto}
+
+.shelf-row2{display:flex;gap:4px;overflow-x:auto;align-items:flex-end;border-bottom:3px solid var(--ink);margin:12px 2px 0;padding:6px 2px 0;touch-action:pan-x;scrollbar-width:none}
+.shelf-row2::-webkit-scrollbar{display:none}
+.shelf-row2 .sb{flex:none;width:76px}
+.snm{font-size:12px;line-height:1.3;color:var(--ink2);white-space:nowrap;max-width:76px;overflow:hidden;text-overflow:ellipsis;margin:3px 0 4px;letter-spacing:-.02em}
+.hrow{display:flex;align-items:center;gap:12px;width:100%;padding:12px 4px;border-bottom:1px solid var(--line)}
+.hrow .drop{margin:0 6px 0 4px}
+.hrow .hn{flex:1;min-width:0;font-weight:700;font-size:15px}.hrow .hn small{display:block;font-weight:400;font-size:12px;color:var(--ink3)}
+.hrow .hk{flex:none;font-size:13px;color:var(--ink3);font-weight:700}
+.hrow.on .hk{color:var(--glass)}
+.iconbtn.lit{color:var(--amber)}
+input.vol{width:130px;accent-color:var(--amber)}
+
+/* v9: nature background + title screen */
+#nat{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:radial-gradient(120% 55% at 90% -8%,color-mix(in srgb,var(--ok) 13%,transparent),transparent 62%),radial-gradient(100% 50% at -10% 108%,color-mix(in srgb,var(--glass) 9%,transparent),transparent 62%),radial-gradient(70% 30% at 60% 100%,color-mix(in srgb,var(--gA) 9%,transparent),transparent 70%)}
+#nat svg{position:absolute;overflow:visible;fill:var(--ok);stroke:var(--ok);opacity:.075}
+#nat .nb1{right:-40px;top:-30px;width:230px;height:270px;transform-origin:100% 0;animation:sway 17s ease-in-out infinite alternate}
+#nat .nb2{left:-50px;bottom:-40px;width:230px;height:270px;transform-origin:0 100%;animation:sway 21s ease-in-out -6s infinite alternate}
+@keyframes sway{from{transform:rotate(-1.8deg)}to{transform:rotate(2deg)}}
+#nat .rg{position:absolute;left:50%;bottom:7%;width:0;height:0}
+#nat .rg i{position:absolute;left:-150px;top:-40px;width:300px;height:80px;border-radius:50%;border:1.2px solid var(--gA);opacity:0;animation:ring 11s ease-out infinite}
+#nat .rg i:nth-child(2){animation-delay:-3.7s}#nat .rg i:nth-child(3){animation-delay:-7.4s}
+@keyframes ring{0%{transform:scale(.15);opacity:.0}12%{opacity:.14}100%{transform:scale(1.5);opacity:0}}
+#intro{position:fixed;inset:0;z-index:300;background:#08191f;color:#e8f3ee;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;overflow:hidden}
+#introCv{position:absolute;inset:0;width:100%;height:100%;display:block}
+#intro .itx{position:absolute;left:0;right:0;top:34%;text-align:center;padding-inline:24px;transition:opacity .45s}
+#intro .itx h1{font-family:'Cormorant Garamond','Shippori Antique B1',Georgia,serif;font-weight:400;font-size:clamp(50px,16.5vw,76px);letter-spacing:.1em;padding-left:.1em;line-height:1.15;margin:0;text-shadow:0 0 28px rgba(190,240,220,.35)}
+#intro .itx .orn{font-size:15px;letter-spacing:.9em;padding-left:.9em;color:rgba(232,196,128,.9);margin:0 0 14px}
+#intro .itx .iln{width:46px;height:1px;background:rgba(220,244,232,.45);margin:20px auto 16px}
+#intro .itx p{margin:0;font-size:13.5px;letter-spacing:.2em;padding-left:.2em;color:rgba(224,240,232,.78)}
+#intro .ih{position:absolute;left:0;right:0;bottom:calc(11% + env(safe-area-inset-bottom,0px));text-align:center;font-size:13px;letter-spacing:.18em;color:rgba(224,240,232,.7);transition:opacity .45s}
+#intro .ih i{display:block;position:relative;width:26px;height:26px;margin:0 auto 14px}
+#intro .ih i::before,#intro .ih i::after{content:"";position:absolute;inset:0;border-radius:50%;border:1.2px solid rgba(220,244,232,.6);animation:ihp 3.2s ease-out infinite}
+#intro .ih i::after{animation-delay:-1.6s}
+@keyframes ihp{0%{transform:scale(.3);opacity:.9}100%{transform:scale(2.6);opacity:0}}
+#intro.go .itx,#intro.go .ih{opacity:0}
+
+/* v12: touch targets, wrapping, library chips, breath order */
+.iconbtn{width:44px;height:44px}
+.link{display:inline-flex;align-items:center;min-height:44px;border-bottom:0;padding-bottom:0;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px}
+summary{padding-block:11px;font-size:13.5px}
+.chip{min-height:42px;display:inline-flex;align-items:center}
+.btn{min-height:44px}.btn.sm{min-height:42px}
+.switch::before{content:"";position:absolute;inset:-9px -8px}
+.tab{min-height:52px;justify-content:center}
+.rc h4,.shead h2,.it .nm{word-break:keep-all;overflow-wrap:anywhere}
+.chiprow{display:flex;gap:6px;overflow-x:auto;margin:10px -4px 4px;padding:2px 4px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chiprow::-webkit-scrollbar{display:none}
+.chiprow .chips{flex-wrap:nowrap;margin:0;flex:none}
+.chiprow .chip{white-space:nowrap}
+.lhelp{margin:0 0 4px}
+.privacy{font-size:12px;color:var(--ink3);margin:-4px 0 8px}
+.glab2 small{font-size:12px}
+.stab{min-height:42px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="nat" aria-hidden="true"></div>
+<div class="app">
+  <div class="top">
+    <h1 class="brand"><span class="o">～</span>AromaLab<span class="o">～</span></h1>
+    <div style="display:flex;gap:8px"><button class="iconbtn" id="bgmBtn" aria-label="ヒーリング音楽の切替"></button><button class="iconbtn" id="sndBtn" aria-label="効果音の切替"></button><button class="iconbtn" id="themeBtn" aria-label="テーマ切替"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg></button></div>
+  </div>
+  
+
+  <section class="view active" id="v-home">
+    <div class="shelf" id="shelf"></div>
+    <button class="safebar" id="safebar"></button>
+    <div class="glabel" style="margin-top:14px">目的からさがす</div>
+    <details style="margin:0"><summary>記号の見方</summary><div class="legend"><span><i class="sym A">◎</i>メタ解析あり</span><span><i class="sym B">○</i>ヒト対照試験あり</span><span><i class="sym C">△</i>弱い・間接的</span><span><i class="sym X">×</i>試験で支持されず</span><span><i class="sym N">–</i>香りの研究なし</span></div></details>
+    <div id="purposes"></div>
+    <div class="glabel">ショップの分類で見る</div>
+    <details><summary>ショップ掲載の20分類を開く（根拠の強さは未評価）</summary><div class="chips" id="shopChips" style="margin-top:10px"></div></details>
+    <p class="note" style="margin-top:20px">評価は、各研究の著者が書いた要旨・本文を確認して付けています。研究の多くは病院など特定の場面のもので、家庭での効果を保証するものではありません。香りの感じ方は個人差が大きく、医療の代わりにはなりません。</p>
+  </section>
+
+  <section class="view" id="v-blend">
+    <div class="glabel" style="margin-top:6px">目的を選ぶ</div>
+    <select class="search" id="goalSel"></select>
+    <div id="goalRecipes"></div>
+    <div class="glabel">ボトルで調整する</div>
+    <div class="bench"><canvas id="fxCv" class="fx" aria-hidden="true"></canvas>
+      <div class="stage">
+        <div class="tot" id="tot"></div>
+        <div class="bwrapc"><canvas id="bottleCv" width="140" height="220" role="img" aria-label="ボトルの中身"></canvas><div class="hint" id="bhint">下の小瓶をタップ</div></div>
+        <button class="puff" id="puffBtn" data-q aria-label="香らせる"><svg viewBox="0 0 24 24"><path d="M12 3c3 3 3 6 0 8s-3 5 0 8"/><path d="M6.5 6c2 2 2 4 0 5.5S4.5 15 6.5 17"/><path d="M17.5 6c2 2 2 4 0 5.5s-2 3.5 0 5.5"/></svg><span>香らせる</span></button>
+      </div>
+      <p class="note ctr" id="bmsg"></p>
+      <div id="meter"></div>
+      <div class="glab2">精油をタップで1滴<small>点線の瓶は未所持（試すだけでOK）</small></div>
+      <div class="mshelf" id="mshelf"></div>
+      <div class="slots" id="slots"></div>
+      <div class="acts" style="margin-top:6px"><button class="btn ghost sm" id="clearBottle">空にする</button></div>
+      <p class="note" id="usage" style="margin:8px 0"></p>
+      <div style="display:flex;gap:8px"><input class="search" id="rname" placeholder="レシピ名（例：朝の仕事用）" maxlength="30"><button class="btn" id="saveR">記録</button></div>
+    </div>
+    <div class="glabel">レシピ帳<small>使ったら★で評価</small></div>
+    <div id="recipes"></div>
+  </section>
+
+  <section class="view" id="v-lib">
+    <input class="search" id="q" placeholder="精油名・効能・香り・成分で検索">
+    <select class="search" id="effSel" style="margin-top:8px" aria-label="効能でしぼる"></select>
+    <div class="chiprow"><div class="chips" id="haveChips"></div><div class="chips" id="famChips"></div></div>
+    <details class="lhelp"><summary>記号の見方</summary><div class="legend"><span><i class="sym V">●</i>原典で確認したヒト試験あり</span><span><i class="sym W">△</i>弱い・間接的</span><span><i class="sym U">·</i>未確認</span></div><p class="note" style="margin:6px 0 0">各精油の1行目が効能です。●△は研究で確認できた目的、「ショップ記載」は研究の裏付けを確認できていない説明です。</p></details>
+    <div id="libOut"></div>
+  </section>
+
+  <section class="view" id="v-breath">
+    <div class="mistw"><canvas id="mistCv" width="280" height="280" aria-hidden="true"></canvas><div class="lbl" id="blbl">準備<small>3:00</small></div></div>
+    <div style="display:flex;gap:8px;justify-content:center"><button class="btn" id="bstart">はじめる</button></div>
+    <p class="note" style="text-align:center;margin-top:12px">吸う4秒・吐く6秒のペースです。香りは軽く1〜2滴で、無香でも構いません。</p>
+    <details class="card" style="margin-top:14px"><summary><b>香りと呼吸について（根拠）</b></summary>
+      <div class="note">「考えがぐるぐるする」時の補助です。反芻を減らす根拠があるのはマインドフルネス（Mao 2023、RCT 61件のメタ解析）、ストレス・不安には呼吸法（Fincham 2023 のメタ解析）で、香りそのものが反芻を減らすという研究は見つかっていません。香りは「この時間が始まる合図」として使います。</div></details>
+    <div id="bscent"></div>
+  </section>
+
+  <section class="view" id="v-safe">
+    <div class="glabel">安全フィルター</div>
+    <div class="card" id="safeSw"></div>
+    <p class="note">オンにした項目で「避ける」とされる精油はレシピから外し、「注意」「情報不足」は印を付けます。情報不足は安全という意味ではありません。</p>
+    <div class="glabel">苦手な香り（タップで切替）</div>
+    <div id="famPref"></div>
+    <p class="note">苦手にした系統は、レシピと「最初の5本」から外します。好きな香りであることが効果の前提になるためです（Herz 2009、Howard &amp; Hughes 2008）。</p>
+    <div class="glabel">部屋の広さ（滴数の目安に使います）</div>
+    <div class="chips" id="roomChips"></div>
+    <p class="note">滴数は調香の経験則による目安で、研究に基づく数値ではありません。少なめから始め、機種の説明書の上限を優先してください。</p>
+    <div class="glabel">音と振動</div>
+    <div class="card" id="feelSw" style="padding-block:4px"></div>
+    <div class="glabel">芳香で共通の注意</div>
+    <div class="card note">
+      ・換気し、30〜60分使ったら休む。嗅ぎ続けると鼻が慣れるので、香りが弱く感じても足しすぎない。<br>・乳幼児・ペット（特に猫・小鳥）のいる部屋では、濃度と精油を慎重に選ぶ。<br>・ミント・ユーカリなど1,8-シネオールやメントールの多い精油は、小さな子の顔の近くで使わない。<br>・原液を肌に付けない。飲まない。<br>・柑橘系は酸化しやすいとされます。開封後は冷暗所で保管し、香りが変わったら使わない（一般的な注意・確度は中程度）。<br>・精油の拡散で室内の揮発性有機化合物が増えるという報告があります（Su 2007、Angulo Milhem 2020）。<br>・喘息などの呼吸器疾患、持病、服薬中は主治医に相談。
+      <br><span style="color:var(--ink3)">出典：Tisserand &amp; Young, Essential Oil Safety 第2版 ほか。精油ごとの確度は各詳細の「安全」タブに表示。</span></div>
+    <div class="glabel">このアプリのデータについて</div>
+    <div class="card note">精油名・学名・ショップの説明は SolLunas の公開ページによります。目的別の効果は、各研究の著者が書いた要旨または本文を確認して整理しました（確認できなかったものは「書誌のみ」「見つからず」と表示）。精油ごとの「未確認の引用」は自動収集のままで、原典は未確認です。香りの相性と滴数は調香の経験則です。</div>
+    <button class="btn ghost" id="resetup" style="margin-top:6px">初期設定をやり直す</button>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="画面の切り替え"><div class="in" id="tabs" role="tablist"></div></nav>
+<div class="backdrop" id="bd"></div>
+<div class="sheet" id="sheet"><div class="grab" id="grab"><i></i></div><div class="body" id="sbody"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<div id="intro" role="button" tabindex="0" aria-label="画面にふれてはじめる"><canvas id="introCv" aria-hidden="true"></canvas><div class="itx"><div class="orn">✦ ✧ ✦</div><h1>AromaLab</h1><div class="iln"></div><p>～ 自分と家族のための、香りの工房 ～</p></div><div class="ih"><i></i>画面にふれてください</div></div>
+<script src="aroma_data.js"></script>
+<script>
+(function(){
+var D=AROMA_DATA,oils=D.oils,byId={},P=D.purposes,pById={};oils.forEach(function(o){byId[o.id]=o;});P.forEach(function(p){pById[p.id]=p;});
+var mem={};
+function ld(k,d){try{var v=localStorage.getItem(k);if(v!==null)return JSON.parse(v);}catch(e){}return (k in mem)?mem[k]:d;}
+function sv(k,v){mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function buzz(){}
+function sn(o){return o.name.split(/[ （(]/)[0].replace('・コモン/トゥルー','');}
+var st={safety:ld('aro3.safety',{}),dislike:ld('aro3.dislike',[]),room:ld('aro3.room',null),have:ld('aro2.have',[]),book:ld('aro3.book',[]),theme:ld('aro2.theme','auto'),setup:ld('aro3.setup',false),bottle:ld('aro3.bottle',[]),goal:ld('aro3.goal','')};
+st.sound=ld('aro3.sound',true);st.haptic=ld('aro3.haptic',true);st.bgm=ld('aro3.bgm',false);st.bgvol=ld('aro3.bgvol',.6);
+function hap(p){if(!st.haptic)return;try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+var SFX=(function(){var ac=null,master=null,send=null,comp=null,ti=0;
+  /* オルゴール風：櫛歯の金属音。Cペンタトニックなので、どの音を重ねても濁らない */
+  var SCALE=[523.25,587.33,659.25,783.99,880,1046.5,1174.66,1318.51,1567.98,1760,2093,2349.32,2637.02].map(function(f){return f*.5;});
+  var N={C5:SCALE[0],D5:SCALE[1],E5:SCALE[2],G5:SCALE[3],A5:SCALE[4],C6:SCALE[5],D6:SCALE[6],E6:SCALE[7],G6:SCALE[8],A6:SCALE[9],C7:SCALE[10],D7:SCALE[11],E7:SCALE[12]};
+  var PHR=[N.E6,N.G6,N.A6,N.G6,N.E6,N.D6,N.C6,N.D6],FB={woody:0,earthy:1,resin:2,balsamic:3,spice:3,herbal:4,green:5,floral:6,citrus:8,minty:9};
+  function hs(s){var h=0;s=String(s);for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;}
+  function ci(i){return Math.max(0,Math.min(12,i));}
+  function oilIdx(o){var b=FB[o.scentFamily];if(b==null)b=4;return ci(b+(hs(o.id)%3)-1);}
+  function A(f){if(!st.sound&&!f)return null;
+    if(!ac){var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+      try{ac=new C();comp=ac.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=3;comp.connect(ac.destination);
+        master=ac.createGain();master.gain.value=.42;master.connect(comp);
+        var cv=ac.createConvolver(),len=Math.floor(ac.sampleRate*2.4),buf=ac.createBuffer(2,len,ac.sampleRate);
+        for(var c=0;c<2;c++){var d=buf.getChannelData(c),p=0;for(var i=0;i<len;i++){p=p*.5+(Math.random()*2-1)*.5;d[i]=p*Math.pow(1-i/len,2.8);}}
+        cv.buffer=buf;send=ac.createGain();send.gain.value=.55;var wg=ac.createGain();wg.gain.value=.5;send.connect(cv);cv.connect(wg);wg.connect(comp);
+      }catch(e){ac=null;return null;}}
+    if(ac.state==='suspended'){try{ac.resume();}catch(e){}}return ac;}
+  function part(a,f,vol,t,dec,type,wet){var o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);try{o.detune.value=(Math.random()-.5)*8;}catch(e){}
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+dec);o.connect(g);g.connect(master);if(send&&wet!==0)g.connect(send);o.start(t);o.stop(t+dec+.05);}
+  function note(f,vol,delay,dec){var a=A();if(!a)return;var t=a.currentTime+(delay||0)+Math.random()*.01;vol=(vol||.12)*(.88+Math.random()*.24);dec=dec||1.1;
+    part(a,f,vol,t,dec);part(a,f*2.003,vol*.14,t,dec*.5);part(a,f*6.27,vol*.03,t,.09,'sine',0);part(a,f*.5,vol*.05,t,dec*.6,'triangle');}
+  function chord(idx,vol,delay,dec){delay=delay||0;var third=idx+2>12?idx-3:idx+2;note(SCALE[ci(idx)],vol,delay,dec);note(SCALE[ci(third)],vol*.5,delay+.06,dec*.9);if(idx>=5)note(SCALE[ci(idx-5)],vol*.4,delay+.12,dec);}
+  function sweep(f0,f1,dur,vol,delay,wet){var a=A();if(!a)return;var t=a.currentTime+(delay||0),o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.007);g.gain.exponentialRampToValueAtTime(.0001,t+dur+.05);o.connect(g);g.connect(master);if(wet&&send)g.connect(send);o.start(t);o.stop(t+dur+.1);}
+  /* ---- 内蔵ヒーリング音楽：ファイルなし。ゆっくり重なるパッド＋ときどき鳴るオルゴールの音 ---- */
+  var bg=null,bgOn=false,bgTc=null,bgTn=null,bgStep=0,bgCur=null;
+  var CHORDS=[[130.81,196,261.63,329.63,392],[110,164.81,220,261.63,329.63],[87.31,174.61,220,261.63,329.63],[98,196,246.94,293.66,329.63]];
+  function bgLvl(){var v=st.bgvol==null?.6:st.bgvol;return Math.max(0,Math.min(1,v))*1.4;}
+  function bgPad(a,ch,t,dur){ch.forEach(function(f,i){[['sine',1],['triangle',.35]].forEach(function(w){var o=a.createOscillator(),g=a.createGain(),lp=a.createBiquadFilter(),v=.02*w[1]*(i===0?1.3:1);
+    o.type=w[0];o.frequency.value=f;try{o.detune.value=(Math.random()-.5)*10;}catch(e){}lp.type='lowpass';lp.frequency.value=900;
+    g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+dur*.4);g.gain.setValueAtTime(v,t+dur*.6);g.gain.linearRampToValueAtTime(.0001,t+dur+2.5);
+    o.connect(lp);lp.connect(g);g.connect(bg);o.start(t);o.stop(t+dur+2.6);});});}
+  function bgBell(a,f,t){var o=a.createOscillator(),o2=a.createOscillator(),g=a.createGain(),g2=a.createGain();o.type=o2.type='sine';o.frequency.value=f;o2.frequency.value=f*2.003;g2.gain.value=.18;
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.03,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+3.2);o.connect(g);o2.connect(g2);g2.connect(g);g.connect(bg);o.start(t);o2.start(t);o.stop(t+3.3);o2.stop(t+3.3);}
+  function bgChord(){if(!bgOn||!ac)return;bgCur=CHORDS[bgStep++%CHORDS.length];bgPad(ac,bgCur,ac.currentTime+.05,10);bgTc=setTimeout(bgChord,9000);}
+  function bgNote(){if(!bgOn||!ac)return;if(ac.state==='running'&&bgCur){var f=bgCur[1+Math.floor(Math.random()*(bgCur.length-1))]*(Math.random()<.5?2:4);bgBell(ac,f,ac.currentTime+.02);}bgTn=setTimeout(bgNote,1800+Math.random()*3200);}
+  return {
+    bgm:function(on){bgOn=!!on;clearTimeout(bgTc);clearTimeout(bgTn);var a=A(true);if(!a){bgOn=false;return false;}
+      if(!bg){bg=a.createGain();bg.gain.value=0;bg.connect(comp);var s2=a.createGain();s2.gain.value=.8;bg.connect(s2);if(send)s2.connect(send);}
+      bg.gain.cancelScheduledValues(a.currentTime);bg.gain.setTargetAtTime(bgOn?bgLvl():0,a.currentTime,bgOn?2:.6);
+      if(bgOn){bgStep=0;bgChord();bgTn=setTimeout(bgNote,3000);}return true;},
+    bgvol:function(){if(bg&&ac&&bgOn)bg.gain.setTargetAtTime(bgLvl(),ac.currentTime,.1);},
+    dbg:function(){return ac?{s:ac.state,on:bgOn,step:bgStep}:null;},
+    pu:function(k){var f=(k==='lg'?200:k==='bottle'?300:340)*(.94+Math.random()*.12);sweep(f,f*.62,.07,k==='lg'?.035:.065,0,false);},
+    plop:function(delay){var f=720*(.92+Math.random()*.16);sweep(f,f*.38,.11,.085,delay||0,true);},
+    tap:function(){note(PHR[ti++%PHR.length],.045,0,.5);},
+    on:function(){note(N.E6,.09,0,.7);note(N.A6,.09,.09,.9);},
+    off:function(){note(N.A6,.07,0,.6);note(N.E6,.07,.09,.8);},
+    oil:function(o,k,delay){if(!o)return;var i=oilIdx(o);chord(i,.085+Math.min(k||1,6)*.004,delay||0,1.7);note(SCALE[ci(i+1+((k||1)%3))],.03,(delay||0)+.14,1);},
+    drop:function(k,delay){note(SCALE[Math.max(0,(k||1)-1)%8+3],.13,delay||0,1.1);},
+    clink:function(){note(N.G6,.07,0,.7);note(N.C7,.08,.05,.9);},
+    whoosh:function(){},
+    chime:function(n){var s=SCALE.slice(3,3+Math.max(1,Math.min(8,n)+0));s.forEach(function(f,i){note(f,i===s.length-1?.13:.09,i*.1,i===s.length-1?1.8:.9);});chord(Math.min(10,2+n),.07,s.length*.1,2);},
+    swirl:function(){var i=hs(String(Math.random()))%4;for(var k=0;k<10;k++){i=ci(i+(Math.random()<.7?1:-1));note(SCALE[i],.055,k*.05,.7);}},
+    mist:function(list){var ix=[];(list||[]).forEach(function(o){var i=oilIdx(o);if(ix.indexOf(i)<0)ix.push(i);});if(!ix.length)ix=[5,7,8];ix.sort(function(a,b){return a-b;});
+      var t=0;for(var r=0;r<2;r++)ix.forEach(function(i){note(SCALE[i],.09,t,1.9);t+=.17;});
+      ix.forEach(function(i,k){chord(i,.075,t+.1+k*.03,3.2);});},
+    remove:function(){note(N.G5,.08,0,.5);},warn:function(){note(N.D5,.08,0,.35);note(N.C5,.08,.1,.5);},
+    breath:function(ph){var up=[N.C5,N.E5,N.G5,N.C6],dn=[N.C6,N.A5,N.G5,N.E5,N.D5,N.C5];note(ph<4?up[ph]:dn[ph-4],.09,0,1.8);}};})();
+document.addEventListener('click',function(e){var q=e.target.closest&&e.target.closest('button,summary');if(!q||q.hasAttribute('data-q'))return;SFX.tap();hap(8);},true);
+/* ぷにっ：押すと潰れ、離すと弾んで戻る（サイズ別に強さを変える） */
+var JEL=(function(){var RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),PRESS='button,summary,.prow,.row,.fam',cur=null;
+  var DOWN={sm:'scale(1.14,.82)',md:'scale(1.06,.9)',lg:'scale(.978,.955)',bottle:'translateY(-2px) scale(.94,1.07)'};
+  var REL={sm:['scale(1.14,.82)','scale(.88,1.17)','scale(1.06,.95)','scale(.985,1.02)','scale(1)'],
+    md:['scale(1.06,.9)','scale(.95,1.08)','scale(1.03,.975)','scale(.995,1.006)','scale(1)'],
+    lg:['scale(.978,.955)','scale(1.012,1.022)','scale(.997,.994)','scale(1)'],
+    bottle:['translateY(-2px) scale(.94,1.07)','translateY(-7px) rotate(-5deg) scale(1.02,.98)','translateY(0) rotate(3deg) scale(.99,1.01)','rotate(-1deg)','rotate(0deg)']};
+  function kind(el){var cl=el.classList;if(cl.contains('mb')||cl.contains('sb'))return 'bottle';if(cl.contains('puff'))return 'sm';var r=el.getBoundingClientRect(),m=Math.min(r.width,r.height),w=Math.max(r.width,r.height);return m<=44?'sm':(m<=72&&w<=300)?'md':'lg';}
+  function pre(el){return (el.classList.contains('btn')||el.classList.contains('chip'))?'translateY(2px) ':'';}
+  function down(e){if(RM||(e.button>0)||!e.target.closest)return;var el=e.target.closest(PRESS);if(!el||el.disabled)return;end(true);
+    var k=kind(el),y=pre(el);cur={el:el,k:k,y:y,x:e.clientX,yy:e.clientY};
+    try{cur.a=el.animate([{transform:'none'},{transform:y+DOWN[k]}],{duration:120,easing:'cubic-bezier(.2,.7,.3,1)',fill:'forwards'});}catch(_){cur=null;return;}
+    SFX.pu(k);}
+  function end(cancel){if(!cur)return;var c=cur;cur=null;try{c.a.cancel();}catch(_){}if(cancel)return;
+    var fr=REL[c.k].map(function(t,i){return {transform:(i===0?c.y:'')+t,easing:'cubic-bezier(.25,.1,.3,1)'};});
+    try{c.el.animate(fr,{duration:c.k==='lg'?400:580});}catch(_){}}
+  document.addEventListener('pointerdown',down,{capture:true,passive:true});
+  document.addEventListener('pointerup',function(){end(false);},{capture:true,passive:true});
+  document.addEventListener('pointercancel',function(){end(true);},{capture:true,passive:true});
+  document.addEventListener('pointermove',function(e){if(cur&&(Math.abs(e.clientX-cur.x)>10||Math.abs(e.clientY-cur.yy)>10))end(true);},{capture:true,passive:true});
+  return {};})();
+var tt;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on');},2600);}
+var FAM={citrus:['柑橘','#e3b23c','みかんやレモンの皮'],floral:['フローラル','#c0788f','バラや花束'],herbal:['ハーブ','#6aa56e','ハーブティー、ラベンダー畑'],woody:['ウッディ','#9b7653','ヒノキ風呂、鉛筆の木'],resin:['樹脂','#c4693b','お香、教会の香'],spice:['スパイス','#d0573f','シナモン、胡椒'],earthy:['アーシー','#7d7a5a','雨上がりの土、古い木箱'],green:['グリーン','#8cbf5c','刈った草、青葉'],minty:['ミント','#4fb3c4','ミントガム、スーッとする感じ'],balsamic:['バルサミック','#8e6aa8','バニラ、甘い樹脂']};
+var OC=[[/ラベンダー/,'#9d86d9'],[/レモングラス/,'#c5d84a'],[/ユーカリ・レモン/,'#a9dc8a'],[/ラディアータ/,'#7cc8b0'],[/ユーカリ/,'#6cc4a4'],[/メリッサ/,'#cfe36a'],[/レモン/,'#f5dc3d'],[/ライム/,'#8fd14f'],[/グレープフルーツ/,'#f58b6b'],[/ブラッド/,'#d9482f'],[/ビター/,'#e68a22'],[/マンダリン/,'#f9a84a'],[/タンジェリン/,'#f58a3a'],[/クレメンタイン/,'#f9b23a'],[/オレンジ/,'#f7a02c'],[/ベルガモット/,'#b8cf4a'],[/リツェア/,'#d8d84a'],[/シトロネラ/,'#aacb3a'],[/ネロリ/,'#f4c98b'],[/チュベローズ/,'#f7dfe6'],[/ローズマリー/,'#5aa86c'],[/ローズウッド/,'#c9705f'],[/ローズ/,'#e05583'],[/ゼラニウム/,'#e9739f'],[/パルマローザ/,'#f08fa8'],[/ホーウッド|ホーリーフ/,'#d9a1bb'],[/イランイラン/,'#f2d466'],[/ジャスミン/,'#fbefb8'],[/チュベローズ/,'#f7dfe6'],[/リンデン/,'#d0e28c'],[/アイリス/,'#b9a6e0'],[/アンブレット/,'#d9b9a3'],[/カモミール/,'#f3df72'],[/ペパー/,'#3dd6b8'],[/スペア/,'#5fd68f'],[/ハッカ/,'#35c8d0'],[/ウィンターグリーン/,'#7fd0c0'],[/カンファー/,'#bfe3dc'],[/バーチ/,'#c9e0b0'],[/ティトリー|ニアウリ|カユブテ/,'#84d19c'],[/ローズマリー/,'#5aa86c'],[/バジル|シソ|ゲットウ/,'#7cb65a'],[/タイム|オリガナム|セイボリー/,'#7a9a55'],[/セージ/,'#9bbf8a'],[/マジョラム|ヒソップ|ヤロウ|イニュラ/,'#8fb86e'],[/イモーテル/,'#f2c94c'],[/セントジョーンズ/,'#e8b830'],[/チェストツリー/,'#a6a0d0'],[/アンジェリカ・ルート/,'#a89870'],[/アンジェリカ/,'#b8c490'],[/ヒノキ/,'#dcb985'],[/スギ|シダー/,'#b8845a'],[/サンダルウッド/,'#d9ab7c'],[/ジュニパー/,'#5f93a8'],[/サイプレス/,'#5e8f6e'],[/クロモジ/,'#cadda0'],[/ラーチ/,'#a3bb7e'],[/フランキンセンス/,'#ebcf8f'],[/ミルラ/,'#a9683d'],[/エレミ/,'#cdd7a0'],[/アンバー/,'#d98d33'],[/安息香|ベンゾイン/,'#cc8f5f'],[/トンカ/,'#8a5a3c'],[/シナモン/,'#b8532c'],[/クローブ/,'#8f3e2c'],[/ジンジャー/,'#dca84d'],[/ブラックペッパー/,'#787882'],[/カルダモン/,'#a9c77c'],[/アニス|フェンネル/,'#c9b87a'],[/キャラウェイ|コリアンダー|クベバ/,'#c9a063'],[/パチュリ/,'#78603c'],[/ベチバー/,'#84743d'],[/オークモス/,'#7b8a52'],[/スパイクナード/,'#8d7a60'],[/キャロットシード/,'#e0903f'],[/ガルバナム/,'#6fb35a'],[/プチグレン/,'#9ccb5a'],[/ローレル/,'#6a9a54'],[/ミント/,'#5fd68f']],OCM={};
+function fcol(o){if(OCM[o.id])return OCM[o.id];var c=null;for(var i=0;i<OC.length;i++){if(OC[i][0].test(o.name)){c=OC[i][1];break;}}if(!c)c=(FAM[o.scentFamily]||['','#888'])[1];OCM[o.id]=c;return c;}
+function rgb2hsl(r,g,b){r/=255;g/=255;b/=255;var mx=Math.max(r,g,b),mn=Math.min(r,g,b),h=0,s=0,l=(mx+mn)/2;if(mx!==mn){var d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h/=6;}return [h,s,l];}
+function hsl2rgb(h,s,l){function f(p,q,t){if(t<0)t+=1;if(t>1)t-=1;return t<1/6?p+(q-p)*6*t:t<1/2?q:t<2/3?p+(q-p)*(2/3-t)*6:p;}if(!s){var v=Math.round(l*255);return [v,v,v];}var q=l<.5?l*(1+s):l+s-l*s,p=2*l-q;return [Math.round(f(p,q,h+1/3)*255),Math.round(f(p,q,h)*255),Math.round(f(p,q,h-1/3)*255)];}
+/* 混色：RGB平均だと濁るので、彩度と明るさを入力色の平均に保つ */
+function mixRGB(items){var tot=items.reduce(function(a,it){return a+it.drops;},0)||1,r=0,g=0,b=0,s=0,l=0;items.forEach(function(it){var c=hex2rgb(it.color),w=it.drops/tot,h=rgb2hsl(c[0],c[1],c[2]);r+=c[0]*w;g+=c[1]*w;b+=c[2]*w;s+=h[1]*w;l+=h[2]*w;});
+  var m=rgb2hsl(r,g,b),o=hsl2rgb(m[0],Math.min(1,Math.max(m[1],s*.92)),Math.max(m[2],l*.96));return o;}
+function flab(o){return (FAM[o.scentFamily]||[o.scentFamily])[0];}
+var GS={A:'◎',B:'○',C:'△',D:'△',X:'×',N:'–'};
+var GT={A:'メタ解析あり（特定の精油・場面に限る）',B:'ヒトの対照試験あり（小規模・限定的）',C:'弱い・間接的（経路違い・予備的）',D:'研究が見つからない',X:'試験はあるが、効果は支持されていない',N:'香りではこの目的の研究なし'};
+function symHtml(g,t){return '<span class="sym '+g+'">'+(t||GS[g]||'·')+'</span>';}
+var SUP={verified_human:['V','●','根拠あり','v'],verified_weak:['W','△','根拠は弱い','w'],unverified:['U','·','未確認',''],none:['U','·','根拠なし','']};
+/* best support per oil across purposes */
+oils.forEach(function(o){o.best='none';});
+P.forEach(function(p){p.perOil.forEach(function(x){var o=byId[x.id];if(!o)return;if(x.support==='verified_human')o.best='verified_human';else if(x.support==='verified_weak'&&o.best!=='verified_human')o.best='verified_weak';});});
+var SHORT={wake:'目覚め',focus:'集中',refresh:'気分転換',anxiety:'不安・緊張',stress:'ストレス',irritation:'イライラ',heart:'ドキドキ',switch:'オフへの切替',sleep:'眠り',nausea:'吐き気',pain:'痛みの気分面',pms:'生理前後',craving:'タバコ・間食',deodor:'消臭',bugs:'虫よけ',low:'気分の沈み',positive:'前向きな気分',burnout:'頭の疲れ',confidence:'自信',rumination:'ぐるぐる思考'};
+function effOf(o){var out=[];P.forEach(function(p){var x=p.perOil.filter(function(q){return q.id===o.id;})[0];if(x&&(x.support==='verified_human'||x.support==='verified_weak'))out.push({p:p,s:x.support,line:x.line});});return out.sort(function(a,b){return (a.s==='verified_human'?0:1)-(b.s==='verified_human'?0:1);});}
+function effHtml(o){var e=effOf(o);if(e.length)return '<div class="ef">'+e.map(function(x){return '<span class="'+(x.s==='verified_human'?'h':'w')+'">'+(x.s==='verified_human'?'●':'△')+esc(SHORT[x.p.id]||x.p.title)+'</span>';}).join('')+'</div>';
+  var a=String(o.actions||'').replace(/など$/,'');return '<div class="ef none">ショップ記載：'+esc(a.length>30?a.slice(0,30)+'…':a)+'（研究は未確認）</div>';}
+function supOf(p,id){var x=p.perOil.filter(function(q){return q.id===id;})[0];return x?x.support:'none';}
+/* safety */
+var SAFE=[['pregnancy','妊娠中'],['breastfeeding','授乳中'],['children','小さなお子さんがいる'],['pets','ペットがいる'],['epilepsy','てんかん'],['hypertension','高血圧'],['hypotension','低血圧']];
+function norm(v){v=String(v||'unknown');return v.indexOf('avoid')===0?'avoid':v;}
+var SL={ok:'問題報告なし',caution:'注意',avoid:'避ける',unknown:'情報不足'};
+function chk(o){var r=[],lvl=null;SAFE.forEach(function(d){if(!st.safety[d[0]])return;var lab=d[1].replace('がいる','');
+  if(d[0]==='pets'){if(o.safety.pets){r.push('ペット：注意');if(lvl!=='avoid')lvl='caution';}return;}
+  var v=norm(o.safety[d[0]]);if(v==='avoid'){r.push(lab+'：避ける');lvl='avoid';}else if(v==='caution'){r.push(lab+'：注意');if(lvl!=='avoid')lvl='caution';}else if(v==='unknown'){r.push(lab+'：情報不足');if(!lvl)lvl='unknown';}});
+  return {level:lvl,reasons:r};}
+function disliked(o){return st.dislike.indexOf(o.scentFamily)>=0;}
+function blocked(o){if(chk(o).level==='avoid')return '安全フィルターで「避ける」';if(disliked(o))return '苦手な系統（'+flab(o)+'）';return '';}
+/* drops */
+function roomKey(){return st.room||'S';}
+function totalFor(kind){var r=roomKey();return kind==='solo'?{S:2,M:3,L:4}[r]:{S:3,M:4,L:6}[r];}
+function scale(items,total,single){
+  var cap=roomKey()==='L'?2:1,sum=items.reduce(function(a,x){return a+x[1];},0);
+  var out=items.map(function(x){var o=byId[x[0]],raw=x[1]/sum*total,d=Math.max(1,Math.floor(raw));var c=o.strong?(single?Math.min(2,cap+1):cap):99;var dd=Math.min(d,c);return {id:x[0],drops:dd,f:raw-dd,cap:c};});
+  var guard=0;while(out.reduce(function(a,x){return a+x.drops;},0)<total&&guard++<12){var c=out.filter(function(x){return x.drops<x.cap;}).sort(function(a,b){return b.f-a.f;})[0];if(!c)break;c.drops++;c.f-=1;}
+  return out.map(function(x){return {id:x.id,drops:x.drops};});}
+/* recipes adapted to this user */
+var KL={solo:'まずこの1本',blend:'慣れたら2〜3本',study:'研究で使われた組合せ'};
+function altSolo(p,exclude){var rank={verified_human:0,verified_weak:1,unverified:2,none:3};return p.perOil.slice().sort(function(a,b){return rank[a.support]-rank[b.support];}).map(function(x){return byId[x.id];}).filter(function(o){return o&&!blocked(o)&&exclude.indexOf(o.id)<0;})[0];}
+function recipesOf(p){var out=[],r=p.recipes;
+  // solo
+  if(r.solo){var o=byId[r.solo],notes=[],b=blocked(o);if(b){var a=altSolo(p,[]);if(a){notes.push(sn(o)+'は'+b+'のため、'+sn(a)+'に変更しました。');o=a;}else{notes.push(sn(o)+'は'+b+'のため外しました。この目的で代わりの候補はありません。');o=null;}}
+    if(o)out.push({kind:'solo',pid:p.id,items:scale([[o.id,1]],totalFor('solo'),true),notes:notes});else out.push({kind:'solo',pid:p.id,items:[],notes:notes});}
+  else out.push({kind:'solo',pid:p.id,items:[],notes:['この目的で勧められる精油はありません（効果を支持する研究がないため）。']});
+  // blend
+  var its=[],bn=[];r.blend.forEach(function(x){var o=byId[x[0]],b=blocked(o);if(b)bn.push(sn(o)+'は'+b+'のため外しました。');else its.push(x);});
+  if(its.length&&its.length<r.blend.length&&r.blend[0][0]!==its[0][0]){var a2=altSolo(p,its.map(function(x){return x[0];}));if(a2){its.unshift([a2.id,2]);bn.push('主役を'+sn(a2)+'に変更しました。');}}
+  if(its.length>=2)out.push({kind:'blend',pid:p.id,items:scale(its,totalFor('blend'),false),notes:bn});
+  else if(bn.length)out.push({kind:'blend',pid:p.id,items:[],notes:bn.concat([out[0]&&out[0].items.length?'組み合わせが作れないため、1本での使用をおすすめします。':'この目的では、設定に合うレシピを提案できません。'])});
+  (r.study||[]).forEach(function(s){var sn_=[];s.items.forEach(function(x){var b=blocked(byId[x[0]]);if(b)sn_.push(sn(byId[x[0]])+'：'+b);});
+    var tot=totalFor('blend'),sm=s.items.reduce(function(a,x){return a+x[1];},0),kept=s.items.filter(function(x){return x[1]/sm*tot>=0.4;}),dropd=s.items.filter(function(x){return x[1]/sm*tot<0.4;}),nn=[];if(dropd.length&&!s.fixed)nn.push(dropd.map(function(x){return sn(byId[x[0]]);}).join('・')+'は比率がごく小さく、この滴数では1滴に満たないため省いています。');if(sn_.length)nn.push('あなたの設定に合わない精油を含みます（'+sn_.join('、')+'）。');
+    out.push({kind:'study',pid:p.id,name:s.name,ratio:s.ratio,desc:s.note,items:s.fixed?s.items.map(function(x){return {id:x[0],drops:x[1]};}):scale(kept,Math.max(tot,kept.length),false),notes:nn});});
+  return out;}
+function keyOf(items){return items.map(function(x){return x.id;}).sort().join('|');}
+function myRating(pid,items){var k=keyOf(items),xs=st.book.filter(function(b){return b.star>0&&b.pid===pid&&keyOf(b.items)===k;});if(!xs.length)return '';var a=xs.reduce(function(s,b){return s+b.star;},0)/xs.length;return '<span class="tag v">あなたの評価 ★'+a.toFixed(1)+'（'+xs.length+'回）</span>';}
+function roleTag(p,id,kind){if(kind==='study')return '';var s=SUP[supOf(p,id)]||SUP.none;if(p.oils.indexOf(id)>=0&&supOf(p,id)==='verified_human')return '';var t=p.oils.indexOf(id)<0?'香りの調整役':s[2];return '<span class="tag '+(p.oils.indexOf(id)<0?'':s[3])+'">'+t+'</span>';}
+function dg(n,c){var h='';for(var i=0;i<Math.min(n,6);i++)h+='<i style="background:'+c+'"></i>';return '<span class="dg">'+h+'</span>';}
+function recipeCard(p,rec){var d=document.createElement('div');d.className='rc';
+  var title=rec.kind==='study'?rec.name:(rec.items.length?rec.items.map(function(x){return sn(byId[x.id]);}).join(' ＋ '):'該当なし');
+  var h=miniBottle(rec.items,'mbw')+'<div class="k">'+KL[rec.kind]+'</div><h4>'+esc(title)+'</h4>';
+  rec.items.forEach(function(x){var o=byId[x.id],c=chk(o);h+='<button class="it" data-o="'+esc(o.id)+'"><span class="drop" style="background:'+fcol(o)+'"></span><span class="nm">'+esc(sn(o))+roleTag(p,o.id,rec.kind)+(o.strong?'<span class="tag">強い香り</span>':'')+'<small>'+esc(flab(o))+(c.level?'　⚠ '+esc(c.reasons.join(' / ')):'')+'</small></span><span class="dr">'+dg(x.drops,fcol(o))+x.drops+'<small>滴</small></span></button>';});
+  var info=[];if(rec.ratio)info.push(rec.ratio);if(rec.desc)info.push(rec.desc);
+  if(rec.kind==='solo'&&rec.items.length)info.push(supOf(p,rec.items[0].id)==='verified_human'?'研究の多くは単品で行われています。まず1本で、自分に合うか確かめるのが近道です。':'この目的での根拠は弱い、または見つかっていません。好みの香りとして使う位置づけです。');
+  if(rec.kind==='blend'&&rec.items.length)info.push('この組み合わせ自体は研究で試されていません。印のない精油は、この目的で研究が確認できたもの、「香りの調整役」は香りを整える役割です。');
+  if(rec.kind==='study')info.push('滴数は比率をもとに換算した目安です。研究の条件（対象・使い方）は家庭と異なります。');
+  if(info.length)h+='<details><summary>このレシピについて</summary><div class="note" style="margin-top:4px">'+info.map(esc).join('<br>')+'</div></details>';
+  rec.notes.forEach(function(n){h+='<div class="warn" style="margin-top:4px">'+esc(n)+'</div>';});
+  if(rec.items.length)h+='<div class="acts"><button class="btn sm" data-b>ボトルに入れる</button><button class="btn sm ghost" data-u>使った・記録する</button>'+myRating(p.id,rec.items)+'</div>';
+  d.innerHTML=h;
+  d.querySelectorAll('[data-o]').forEach(function(b){b.onclick=function(){openOil(byId[b.getAttribute('data-o')]);};});
+  var bb=d.querySelector('[data-b]');if(bb)bb.onclick=function(){rec.items.forEach(function(x,i){SFX.oil(byId[x.id],x.drops,.25+i*.16);});hap([12,150,12,150,12]);st.bottle=rec.items.map(function(x){return {id:x.id,drops:x.drops};});st.goal=p.id;closeSheet();go('blend');renderGoal();renderBottle(true);};
+  var bu=d.querySelector('[data-u]');if(bu)bu.onclick=function(){SFX.chime(2);hap([10,60,20]);addBook(p.title+'｜'+KL[rec.kind],p.id,rec.items);toast('レシピ帳に記録しました。使ったあとで★を付けてください');};
+  return d;}
+function addBook(n,pid,items){st.book.unshift({n:n,pid:pid||'',items:items.map(function(x){return {id:x.id,drops:x.drops};}),date:new Date().toISOString().slice(0,10),star:0,memo:''});sv('aro3.book',st.book);renderBook();}
+/* rows */
+function miniBottle(items,cls){var tot=items.reduce(function(a,x){return a+x.drops;},0),y=33,h='';
+  items.slice().sort(function(a,b){return b.drops-a.drops;}).forEach(function(x){var hh=tot?x.drops/tot*20:0;y-=hh;h+='<rect x="2" y="'+y.toFixed(1)+'" width="18" height="'+(hh+.4).toFixed(1)+'" fill="'+fcol(byId[x.id])+'"/>';});
+  return '<svg class="'+(cls||'mb')+'" viewBox="0 0 22 36" aria-hidden="true"><defs><clipPath id="mbc"><path d="M8 7v3c0 2-6 2-6 6v15a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V16c0-4-6-4-6-6V7z"/></clipPath></defs><g clip-path="url(#mbc)"><rect x="0" y="0" width="22" height="36" fill="var(--amber)" opacity=".16"/>'+h+'</g><path d="M8 7v3c0 2-6 2-6 6v15a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V16c0-4-6-4-6-6V7z" fill="none" stroke="var(--ink2)" stroke-width="1.2"/><rect x="6.5" y="1.5" width="9" height="5.5" rx="1.2" fill="var(--ink)"/></svg>';}
+function oilRow(o,i,p){var c=chk(o),b=document.createElement('button');b.className='row';
+  var s=SUP[p?supOf(p,o.id):o.best]||SUP.none;
+  var line=p?(p.perOil.filter(function(x){return x.id===o.id;})[0]||{}).line:(flab(o)+'。'+(o.profile||''));
+  b.innerHTML='<span class="drop" style="background:'+fcol(o)+'"></span><span class="mid"><div class="nm">'+esc(o.name)+(c.level?'<span class="dot '+c.level+'"></span>':'')+(disliked(o)?'<span class="tag">苦手な系統</span>':'')+(st.have.indexOf(o.id)>=0?'<span class="tag v">所持</span>':'')+'</div>'+(p?'':effHtml(o))+'<div class="ds">'+esc(line||'')+'</div></span>'+symHtml(s[0],s[1]);
+  b.addEventListener('click',function(){buzz();openOil(o);});return b;}
+/* sheet */
+var stack=[];
+function showSheet(html,bind){$('sbody').innerHTML=html;$('sbody').scrollTop=0;$('sheet').classList.add('on');$('bd').classList.add('on');if(bind)bind($('sbody'));}
+function pushSheet(fn){if(!stack.length)SFX.whoosh(true);stack.push(fn);fn();}
+function closeSheet(){if($('sheet').classList.contains('on'))SFX.whoosh(false);stack=[];$('sheet').classList.remove('on');$('bd').classList.remove('on');$('sheet').style.transform='';}
+function back(){stack.pop();if(stack.length)stack[stack.length-1]();else closeSheet();}
+$('bd').addEventListener('click',closeSheet);
+(function(){var y0=null,dy=0,g=$('grab');
+ g.addEventListener('touchstart',function(e){y0=e.touches[0].clientY;dy=0;$('sheet').style.transition='none';},{passive:true});
+ g.addEventListener('touchmove',function(e){if(y0==null)return;dy=Math.max(0,e.touches[0].clientY-y0);$('sheet').style.transform='translateY('+dy+'px)';},{passive:true});
+ g.addEventListener('touchend',function(){$('sheet').style.transition='';if(dy>90)closeSheet();else $('sheet').style.transform='';y0=null;});
+ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();});})();
+function sheetHead(title,sub){return '<div class="shead"><div>'+(stack.length>1?'<button class="btn ghost sm" data-back style="margin-bottom:8px">‹ 戻る</button>':'')+'<h2>'+esc(title)+'</h2>'+(sub?'<div class="sci">'+esc(sub)+'</div>':'')+'</div><button class="iconbtn" data-close aria-label="閉じる">✕</button></div>';}
+function wireSheet(el){var b=el.querySelector('[data-back]');if(b)b.onclick=back;var c=el.querySelector('[data-close]');if(c)c.onclick=closeSheet;}
+/* studies */
+var VL={abstract_read:'要旨を確認',fulltext_read:'本文を確認',metadata_only:'書誌のみ確認（内容は未確認）',contradicted:'以前の記載と一致せず',not_found:'原典が見つからず'};
+function studyHtml(s){var bad=s.ver==='contradicted'||s.ver==='not_found';
+  var h='<div class="ev'+(bad?' bad':'')+'"><b>'+esc(s.cite)+'</b><div class="meta">'+esc(s.design||'')+(s.n?'・'+s.n+'人':'')+'・'+esc(s.route||'')+'・'+VL[s.ver]+'</div><div class="note">'+esc(s.result||s.note||'')+'</div>';
+  h+='<details><summary>対象・方法・著者が述べる限界</summary><div class="note" style="margin-top:6px">';
+  [['対象',s.pop],['方法',s.intv],['対照',s.comp],['著者が述べる限界',s.limit],['家庭での利用への当てはまり',s.rel],['注記',s.note]].forEach(function(r){if(r[1])h+='<b>'+r[0]+'</b>：'+esc(r[1])+'<br>';});
+  if(s.link)h+='<a href="'+esc(s.link)+'" target="_blank" rel="noopener">原典を開く ↗</a>';
+  return h+'</div></details></div>';}
+/* oil sheet */
+function openOil(o,tab){pushSheet(function(){drawOil(o,tab||'scent');});}
+function drawOil(o,tab){
+  var c=chk(o),s=SUP[o.best],h=sheetHead(o.name,o.sci);
+  h+='<div class="aura" style="--c:'+fcol(o)+'"><span class="au1"></span><span class="au2"></span><div class="aura-t"><b>'+esc(flab(o))+'の香り</b><span>'+esc((FAM[o.scentFamily]||[])[2]||'')+'のような系統</span><span class="str">強さ <i class="'+(o.strong?'s3':'s2')+'"></i></span></div></div>';
+  h+='<div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">'+symHtml(s[0],s[1])+'<span class="note">'+(o.best==='verified_human'?'原典で確認したヒト試験あり':o.best==='verified_weak'?'弱い・間接的な根拠のみ':'原典で確認した研究なし')+'</span></div>';
+  if(c.level)h+='<div class="warn" style="margin-top:6px">⚠ '+esc(c.reasons.join(' / '))+'</div>';
+  if(disliked(o))h+='<div class="warn" style="margin-top:6px">苦手な系統（'+esc(flab(o))+'）に設定されています</div>';
+  h+='<div class="stabs">'+[['scent','効能と香り'],['evid','研究'],['safe','安全']].map(function(t){return '<button class="stab'+(tab===t[0]?' on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>';}).join('')+'</div>';
+  if(tab==='scent'){
+    var ef=effOf(o);h+='<div class="glabel" style="margin-top:4px">効能<small>研究の著者の記述を確認したもの</small></div>';
+    if(ef.length)h+='<div class="plist">'+ef.map(function(x){return '<button class="prow" data-p="'+x.p.id+'">'+symHtml(x.s==='verified_human'?'V':'W',x.s==='verified_human'?'●':'△')+'<span class="pt"><b>'+esc(x.p.title)+'</b><span class="note" style="display:block">'+esc(x.line)+'</span></span></button>';}).join('')+'</div>';
+    else h+='<p class="note">この精油について、目的別に確認できた研究はありません。</p>';
+    h+='<div class="card" style="margin-top:12px"><h3>ショップ記載の作用<span class="tag">研究は未確認</span></h3><div class="note">'+esc(o.actions||'記載なし')+'</div><details><summary>心・体への説明を読む</summary><div class="note" style="margin-top:6px">'+esc(o.mind)+'<br>'+esc(o.body)+'</div></details></div>';
+    h+='<div class="glabel">香り</div><dl class="kv"><dt>香りの系統</dt><dd>'+esc(flab(o))+'（'+esc((FAM[o.scentFamily]||[])[2]||'')+'のような系統）</dd><dt>印象</dt><dd>'+esc(o.profile)+'</dd><dt>強さ</dt><dd>'+(o.strong?'強い（少量で十分）':'ふつう')+'</dd><dt>主な成分</dt><dd>'+esc((o.constituents||[]).join('、'))+'</dd><dt>合うとされる</dt><dd>'+esc((o.blendsWith||[]).join('、'))+'</dd><dt>採取部位</dt><dd>'+esc(o.part)+'</dd></dl>';
+    h+='<p class="note">香り・相性・強さは調香の経験則です（確度：'+esc(o.scentConf)+'）。</p>';
+    h+='<div class="acts"><button class="btn" data-blend>ボトルに入れる</button><button class="btn ghost" data-have>'+(st.have.indexOf(o.id)>=0?'所持中（外す）':'持っているに入れる')+'</button></div>';
+    if(o.flags&&o.flags.length)h+='<div class="card"><h3>データの注意</h3><div class="note">'+o.flags.map(function(f){return '・'+esc(f);}).join('<br>')+'</div></div>';
+  }else if(tab==='evid'){
+    var any=false;P.forEach(function(p){var x=p.perOil.filter(function(q){return q.id===o.id;})[0];if(!x)return;any=true;var sp=SUP[x.support];
+      h+='<div class="card"><div style="display:flex;gap:8px;align-items:center">'+symHtml(sp[0],sp[1])+'<h3 style="margin:0">'+esc(p.title)+'</h3></div><div class="note" style="margin-top:4px">'+esc(x.line)+'</div>';
+      var ss=p.studies.filter(function(q){return q.oil===o.id;});if(ss.length)h+='<details><summary>この目的の研究（'+ss.length+'件）</summary>'+ss.map(studyHtml).join('')+'</details>';h+='</div>';});
+    if(!any)h+='<div class="empty">目的別に原典を確認した研究はありません</div>';
+    if(o.evidenceOld&&o.evidenceOld.length)h+='<details><summary>未確認の引用（自動収集・原典未確認）'+o.evidenceOld.length+'件</summary>'+o.evidenceOld.map(function(e){return '<div class="ev"><b>'+esc(e.claim)+'</b><div class="note">'+esc(e.summary)+'</div><div class="meta">経路：'+esc(e.route)+'｜'+esc(e.cite)+'</div></div>';}).join('')+'<p class="note">これらは原典を確認していません。誤りを含む可能性があります。</p></details>';
+  }else{
+    h+='<dl class="kv">'+SAFE.filter(function(d){return d[0]!=='pets';}).map(function(d){var v=norm(o.safety[d[0]]);var extra=d[0]==='children'&&String(o.safety.children).indexOf('under')>0?'（'+String(o.safety.children).replace('avoid_under_','')+'歳未満）':'';return '<dt>'+d[1].replace('がいる','')+'</dt><dd class="s-'+v+'">'+SL[v]+extra+'</dd>';}).join('')+'<dt>ペット</dt><dd class="'+(o.safety.pets?'s-caution':'s-unknown')+'">'+(o.safety.pets?'注意':'情報不足')+'</dd><dt>光毒性</dt><dd>'+(o.safety.phototoxic===true?'あり（肌に塗る場合）':'なし／芳香では問題になりにくい')+'</dd></dl>';
+    h+='<p class="note">「情報不足」は安全という意味ではありません。</p>';
+    [['芳香時の注意',o.safety.inhalationNotes],['呼吸器',o.safety.respiratory],['ペット',o.safety.pets],['薬との相互作用',o.safety.drugInteractions],['ショップ記載',(o.caution_site||'')+(o.irritation?'／刺激：'+o.irritation:'')]].forEach(function(r){if(r[1])h+='<div class="card"><h3>'+r[0]+'</h3><div class="note">'+esc(r[1])+'</div></div>';});
+    h+='<p class="note">安全情報の確度：'+esc(o.safety.conf)+'。気になる場合は医師・薬剤師へ。</p>';
+  }
+  showSheet(h,function(el){wireSheet(el);el.querySelectorAll('.stab').forEach(function(b){b.onclick=function(){drawOil(o,b.getAttribute('data-t'));};});
+    el.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){var p=pById[b.getAttribute('data-p')];buzz();pushSheet(function(){drawPurpose(p);});};});
+    var bl=el.querySelector('[data-blend]');if(bl)bl.onclick=function(){closeSheet();if(!st.bottle.some(function(x){return x.id===o.id;})&&st.bottle.length<4)st.bottle.push({id:o.id,drops:1});go('blend');renderBottle(true);};
+    var hv=el.querySelector('[data-have]');if(hv)hv.onclick=function(){var i=st.have.indexOf(o.id);if(i>=0)st.have.splice(i,1);else st.have.push(o.id);sv('aro2.have',st.have);drawOil(o,'scent');renderLib();renderStarterSub();};});
+}
+/* home */
+function purposeBottle(p){var rs=recipesOf(p),r=rs.filter(function(x){return x.kind==='blend'&&x.items.length;})[0]||rs.filter(function(x){return x.kind==='solo'&&x.items.length;})[0];return r?r.items:[];}
+function renderHome(){
+  var out=$('purposes'),groups=[],gm={};P.forEach(function(p){if(!gm[p.group]){gm[p.group]=[];groups.push(p.group);}gm[p.group].push(p);});
+  out.innerHTML='';
+  groups.forEach(function(g){var l=document.createElement('div');l.className='glabel';l.textContent=g;out.appendChild(l);var gr=document.createElement('div');gr.className='plist';
+    gm[g].forEach(function(p){var its=purposeBottle(p),b=document.createElement('button');b.className='prow';
+      b.innerHTML=miniBottle(its)+'<span class="pt"><b>'+esc(p.title)+'</b><small>'+(its.length?esc(its.map(function(x){return sn(byId[x.id]);}).join('、')):'すすめられる精油なし')+'</small></span>'+symHtml(p.grade);
+      b.onclick=function(){buzz();pushSheet(function(){drawPurpose(p);});};gr.appendChild(b);});out.appendChild(gr);});
+  var sc=$('shopChips');sc.innerHTML='';D.concerns.forEach(function(c){var b=document.createElement('button');b.className='chip';b.textContent=c.title;b.onclick=function(){pushSheet(function(){drawList(c.title,'ショップ掲載の分類です。根拠の強さは評価していません。',c.oils);});};sc.appendChild(b);});
+}
+function drawList(title,sub,ids){showSheet(sheetHead(title,'')+'<p class="note">'+esc(sub)+'</p><div id="lst"></div>',function(el){wireSheet(el);var l=el.querySelector('#lst');var rk={verified_human:0,verified_weak:1,none:2};ids.map(function(i){return byId[i];}).filter(Boolean).sort(function(a,b){return rk[a.best]-rk[b.best];}).forEach(function(o,i){l.appendChild(oilRow(o,i));});});}
+function drawPurpose(p){
+  var h=sheetHead(p.title,p.group);
+  var fs=p.summary.split('。')[0]+'。',rs_=p.summary.slice(fs.length);
+  h+='<div class="verdict">'+symHtml(p.grade)+'<div><b>'+GT[p.grade]+'</b><div class="note" style="margin-top:2px">'+esc(fs)+'</div><details><summary>くわしく読む</summary><div class="note" style="margin-top:6px">'+esc(rs_)+(rs_?'<br><br>':'')+esc(p.reason)+'</div></details></div></div>';
+  h+='<div class="glabel">レシピ<small>'+{S:'〜6畳',M:'8〜12畳',L:'13畳〜'}[roomKey()]+'の目安'+(st.room?'':'（広さ未設定のため少なめ）')+'</small></div><div id="rcs"></div>';
+  if(p.id==='rumination')h+='<button class="btn" data-br style="width:100%">3分呼吸をはじめる</button>';
+  h+='<div class="glabel">候補の精油と、この目的での根拠</div><div id="lst"></div>';
+  if(p.blendEv)h+='<div class="glabel">ブレンドでの研究</div><div class="card note">'+esc(p.blendEv)+'</div>';
+  var top=p.studies.slice(0,4),rest=p.studies.slice(4);
+  h+='<div class="glabel">研究<small>著者の記述を確認　'+p.studies.length+'件</small></div>'+top.map(studyHtml).join('')+(rest.length?'<details><summary>残り'+rest.length+'件を表示</summary>'+rest.map(studyHtml).join('')+'</details>':'');
+  showSheet(h,function(el){wireSheet(el);var rc=el.querySelector('#rcs');recipesOf(p).forEach(function(r){rc.appendChild(recipeCard(p,r));});
+    var l=el.querySelector('#lst');p.oils.map(function(i){return byId[i];}).forEach(function(o,i){l.appendChild(oilRow(o,i,p));});
+    var br=el.querySelector('[data-br]');if(br)br.onclick=function(){closeSheet();go('breath');};});
+}
+/* starter kit */
+function starter(n){var owned=st.have.slice(),W={A:3,B:2,C:1},sets=[];
+  P.forEach(function(p){var w=W[p.grade]||0;if(!w)return;recipesOf(p).forEach(function(r){if(r.kind==='study'||!r.items.length)return;sets.push({p:p,w:w,ids:r.items.map(function(x){return x.id;})});});});
+  function covered(own){var c={};sets.forEach(function(s){if(s.ids.every(function(i){return own.indexOf(i)>=0;}))c[s.p.id]=s.p;});return c;}
+  var picks=[],cand={};sets.forEach(function(s){s.ids.forEach(function(i){cand[i]=1;});});
+  for(var k=0;k<n;k++){var base=covered(owned),best=null,bg=-1,bt=-1;Object.keys(cand).forEach(function(i){if(owned.indexOf(i)>=0)return;var c=covered(owned.concat([i])),g=0;Object.keys(c).forEach(function(pid){if(!base[pid])g+=({A:3,B:2,C:1}[c[pid].grade]||0);});var t=0;sets.forEach(function(s){if(s.ids.indexOf(i)>=0)t+=s.w/s.ids.length;});if(g>bg||(g===bg&&t>bt)){bg=g;bt=t;best=i;}});
+    if(!best)break;owned.push(best);picks.push({id:best,cov:Object.keys(covered(owned)).length});}
+  return {picks:picks,cov:covered(owned),total:P.filter(function(p){return W[p.grade];}).length};}
+var shelfShown=false;
+function shelfBottle(o,owned,i){var c=fcol(o),P_='M15 14v6c0 5-11 5-11 13v34a5 5 0 0 0 5 5h26a5 5 0 0 0 5-5V33c0-8-11-8-11-13v-6z';
+  return '<button class="sb" data-o="'+esc(o.id)+'" style="--i:'+i+'" aria-label="'+esc(o.name)+(owned?'（所持）':'（おすすめ）')+'"><svg viewBox="0 0 44 76"><defs><clipPath id="sbc'+i+'"><path d="'+P_+'"/></clipPath></defs>'+
+   (owned?'<g clip-path="url(#sbc'+i+')"><rect x="0" y="0" width="44" height="76" fill="var(--amber)" opacity=".22"/><rect class="liq" x="0" y="34" width="44" height="42" fill="'+c+'"/><rect x="8" y="30" width="3.5" height="36" rx="1.7" fill="#fff" opacity=".28"/></g><path d="'+P_+'" fill="none" stroke="var(--ink)" stroke-width="1.6"/><rect x="12" y="3" width="20" height="11" rx="2.5" fill="var(--ink)"/>'
+          :'<g clip-path="url(#sbc'+i+')"><rect class="liq" x="0" y="52" width="44" height="24" fill="'+c+'" opacity=".55"/></g><path d="'+P_+'" fill="none" stroke="var(--ink3)" stroke-width="1.4" stroke-dasharray="3 3"/><rect x="12" y="3" width="20" height="11" rx="2.5" fill="none" stroke="var(--ink3)" stroke-width="1.4" stroke-dasharray="3 3"/>')+'</svg></button>';}
+function renderShelf(){var el=$('shelf'),own=st.have.map(function(i){return byId[i];}).filter(Boolean),cov=own.length?Object.keys(starter(0).cov).length:0;
+  var h='<h2>いま持っている精油</h2><p>'+(own.length?'タップで詳しく見られます。調香では、ここから1滴ずつ入れられます。':'持っているものを足すと、ここに並びます。')+'</p>';
+  h+='<div class="shelf-row2">'+own.map(function(o,i){return shelfBottle(o,true,i).replace('</svg></button>','</svg><span class="snm">'+esc(sn(o))+'</span></button>');}).join('')+
+    '<button class="sb plus" data-q aria-label="持っている精油を足す"><svg viewBox="0 0 44 76"><path d="M15 14v6c0 5-11 5-11 13v34a5 5 0 0 0 5 5h26a5 5 0 0 0 5-5V33c0-8-11-8-11-13v-6z" fill="none" stroke="var(--ink3)" stroke-width="1.5" stroke-dasharray="3 3"/><rect x="12" y="3" width="20" height="11" rx="2.5" fill="none" stroke="var(--ink3)" stroke-width="1.4" stroke-dasharray="3 3"/><path d="M22 40v16M14 48h16" stroke="var(--ink2)" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg><span class="snm">足す</span></button></div>';
+  h+='<div class="shelf-foot"><span>'+(own.length?'この'+own.length+'本で '+cov+' の目的に使えます':'買う前の精油は、図鑑や調香で試せます')+'</span><button class="link" id="starterBtn">'+(own.length?'買い足すなら':'最初の5本の目安')+'</button></div>';
+  el.innerHTML=h;var sc=el.querySelector('.shelf-row2');
+  el.querySelectorAll('.sb').forEach(function(b){b.setAttribute('data-q','');b.onclick=function(){if(b.classList.contains('plus')){SFX.clink();hap(10);pushSheet(drawHave);return;}SFX.clink();hap(10);openOil(byId[b.getAttribute('data-o')]);};});
+  if(shelfShown)el.querySelectorAll('.liq').forEach(function(n){n.style.animation='none';});shelfShown=true;
+  $('starterBtn').onclick=function(){buzz();pushSheet(drawStarter);};}
+/* 持っている精油を選ぶ（タップで追加・外す） */
+function drawHave(){showSheet(sheetHead('持っている精油','タップで追加・外す')+'<input class="search" id="hq" placeholder="精油名で検索" style="margin:10px 0"><div id="hl"></div>',function(el){wireSheet(el);var hl=el.querySelector('#hl');
+  function r(){var q=el.querySelector('#hq').value.trim().toLowerCase();hl.innerHTML='';
+    oils.filter(function(o){return !q||(o.name+flab(o)).toLowerCase().indexOf(q)>=0;}).forEach(function(o){var b=document.createElement('button');b.setAttribute('data-q','');
+      function paint(){var on=st.have.indexOf(o.id)>=0;b.className='hrow'+(on?' on':'');b.innerHTML='<span class="drop" style="background:'+fcol(o)+'"></span><span class="hn">'+esc(sn(o))+'<small>'+esc(flab(o))+(blocked(o)?'　<span class="warn">'+esc(blocked(o))+'</span>':'')+'</small></span><span class="hk">'+(on?'✓ 持っている':'＋')+'</span>';}
+      paint();b.onclick=function(){var i=st.have.indexOf(o.id);if(i>=0){st.have.splice(i,1);SFX.remove();hap(12);}else{st.have.push(o.id);SFX.oil(o,1);hap(16);}sv('aro2.have',st.have);paint();renderShelf();renderBench();renderLib();};hl.appendChild(b);});
+    if(!hl.children.length)hl.innerHTML='<div class="empty">見つかりません</div>';}
+  el.querySelector('#hq').addEventListener('input',r);r();});}
+function renderStarterSub(){renderShelf();}
+function drawStarter(){var s=starter(5),h=sheetHead('最初に買う5本','根拠のある目的を、少ない本数で広くカバーする順');
+  h+='<p class="note">安全フィルター・苦手な香り・所持している精油を反映して、「まずこの1本」「慣れたら2〜3本」のレシピが作れる目的が増える順に選んでいます。根拠が強い目的（◎）を優先します。</p><div id="lst"></div>';
+  h+='<div class="card note"><b>この'+s.picks.length+'本'+(st.have.length?'＋所持分':'')+'で作れる目的：'+Object.keys(s.cov).length+' / '+s.total+'</b><br>'+Object.keys(s.cov).map(function(k){return GS[s.cov[k].grade]+s.cov[k].title;}).join('、')+'</div>';
+  h+='<p class="note">買う前に、店頭で香りを確かめるか、小さい瓶から始めるのがおすすめです（経験則）。苦手な香りは効果も期待しにくいためです。</p>';
+  showSheet(h,function(el){wireSheet(el);var l=el.querySelector('#lst');s.picks.forEach(function(x,i){var r=oilRow(byId[x.id],i);var t=document.createElement('div');t.className='note';t.style.margin='-4px 0 8px 18px';t.textContent=(i+1)+'本目｜ここまでで作れる目的：'+x.cov;l.appendChild(r);l.appendChild(t);});if(!s.picks.length)l.innerHTML='<div class="empty">設定に合う候補がありません。設定を見直してください。</div>';});}
+
+/* library */
+var lib={q:'',fam:null,have:false,eff:''};
+function renderLib(){
+  var fc=$('famChips');fc.innerHTML='';Object.keys(FAM).forEach(function(k){var b=document.createElement('button');b.className='chip'+(lib.fam===k?' on':'');b.innerHTML='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+FAM[k][1]+';margin-right:5px"></span>'+FAM[k][0];b.onclick=function(){lib.fam=lib.fam===k?null:k;renderLib();};fc.appendChild(b);});
+  var hc=$('haveChips');hc.innerHTML='';var hb=document.createElement('button');hb.className='chip'+(lib.have?' on':'');hb.textContent='持っているものだけ（'+st.have.length+'）';hb.onclick=function(){lib.have=!lib.have;renderLib();};hc.appendChild(hb);
+  var es=$('effSel');if(!es.options.length){es.innerHTML='<option value="">効能でしぼる（すべて）</option>'+P.filter(function(p){return p.grade==='A'||p.grade==='B'||p.grade==='C';}).map(function(p){return '<option value="'+p.id+'">'+GS[p.grade]+' '+esc(p.title)+'</option>';}).join('');es.onchange=function(){lib.eff=es.value;renderLib();};}
+  var ep=pById[lib.eff];
+  var q=lib.q.trim().toLowerCase(),rk={verified_human:0,verified_weak:1,unverified:2,none:2};
+  var list=oils.filter(function(o){if(lib.fam&&o.scentFamily!==lib.fam)return false;if(ep&&(ep.oils.indexOf(o.id)<0||['verified_human','verified_weak'].indexOf(supOf(ep,o.id))<0))return false;if(lib.have&&st.have.indexOf(o.id)<0)return false;if(q){var hay=(o.name+o.sci+o.profile+(o.constituents||[]).join(' ')+flab(o)+effOf(o).map(function(x){return x.p.title+SHORT[x.p.id];}).join(' ')+(o.actions||'')).toLowerCase();if(hay.indexOf(q)<0)return false;}return true;}).sort(function(a,b){return ep?rk[supOf(ep,a.id)]-rk[supOf(ep,b.id)]:(rk[a.best]-rk[b.best])||(effOf(b).length-effOf(a).length);});
+  var out=$('libOut');out.innerHTML='<div class="note" style="margin:6px 0">'+list.length+'件（根拠のあるものから表示）</div>';list.forEach(function(o,i){out.appendChild(oilRow(o,i,ep||null));});if(!list.length)out.innerHTML+='<div class="empty">該当する精油がありません</div>';}
+$('q').addEventListener('input',function(e){lib.q=e.target.value;renderLib();});
+/* blend tab */
+var FOK={citrus:['floral','woody','herbal','spice','resin','green','balsamic','earthy'],floral:['citrus','woody','herbal','resin','balsamic','spice'],herbal:['citrus','woody','minty','floral','green','earthy'],woody:['citrus','floral','herbal','resin','spice','earthy','balsamic','minty'],resin:['citrus','woody','floral','spice','balsamic'],spice:['citrus','woody','resin','floral'],earthy:['woody','citrus','herbal','floral'],green:['citrus','herbal','floral'],minty:['herbal','citrus','woody'],balsamic:['floral','resin','citrus','woody']};
+function pairScore(a,b){var ab=a.bw.indexOf(b.id)>=0,ba=b.bw.indexOf(a.id)>=0;if(ab&&ba)return 2;if(ab||ba)return 1;if(a.scentFamily===b.scentFamily||(FOK[a.scentFamily]||[]).indexOf(b.scentFamily)>=0)return .5;return -.5;}
+function compat(list){if(list.length<2)return null;var t=0,n=0;for(var i=0;i<list.length;i++)for(var j=i+1;j<list.length;j++){t+=pairScore(list[i],list[j]);n++;}return t/n;}
+function compatLabel(c){return c==null?'—':c>=1.5?'定番（互いに「合う」と記載）':c>=.8?'合うとされる':c>=.3?'系統としては無難':'記載なし（試してから）';}
+function renderGoal(){var s=$('goalSel');if(!s.options.length){s.innerHTML='<option value="">目的を選んでください</option>'+P.map(function(p){return '<option value="'+p.id+'">'+GS[p.grade]+' '+esc(p.title)+'</option>';}).join('');s.onchange=function(){st.goal=s.value;renderGoal();renderBottle();};}
+  s.value=st.goal;var out=$('goalRecipes');out.innerHTML='';var p=pById[st.goal];if(!p)return;recipesOf(p).forEach(function(r){out.appendChild(recipeCard(p,r));});}
+/* bottle canvas */
+var REDUCE=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+function hex2rgb(h){h=h.replace('#','');return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
+var BT=(function(){var cv=$('bottleCv'),ctx=cv.getContext('2d'),W=140,H=220,layers=[],drops=[],amp=0,t=0,raf=null,col={},active=false,mix=0,mixT=0,blend=[150,150,150],energy=0,tilt=0,sig='',onMix=null,down=false,lx=0;
+  function lc(l){var r=l.rgb||[136,136,136];return 'rgb('+Math.round(r[0]+(blend[0]-r[0])*mix)+','+Math.round(r[1]+(blend[1]-r[1])*mix)+','+Math.round(r[2]+(blend[2]-r[2])*mix)+')';}
+  function size(){var d=Math.min(window.devicePixelRatio||1,3),s=(cv.clientWidth||W)/W;cv.width=Math.round(W*d*s);cv.height=Math.round(H*d*s);ctx.setTransform(d*s,0,0,d*s,0,0);}
+  function cols(){var cs=getComputedStyle(document.documentElement);['--ink','--ink3','--amber','--line'].forEach(function(k){col[k]=cs.getPropertyValue(k).trim()||'#888';});}
+  function body(){ctx.beginPath();ctx.moveTo(56,34);ctx.lineTo(56,50);ctx.bezierCurveTo(56,64,22,60,22,86);ctx.lineTo(22,192);ctx.quadraticCurveTo(22,208,38,208);ctx.lineTo(102,208);ctx.quadraticCurveTo(118,208,118,192);ctx.lineTo(118,86);ctx.bezierCurveTo(118,60,84,64,84,50);ctx.lineTo(84,34);}
+  function surf(){return 206-layers.reduce(function(a,l){return a+l.h;},0);}
+  function wave(y,a){ctx.lineTo(118,y);for(var x=118;x>=22;x-=4){ctx.lineTo(x,y+(x-70)*tilt+Math.sin(x*.09+t*.045)*(.8+a)+Math.sin(x*.05-t*.03)*.5);}}
+  function draw(){ctx.clearRect(0,0,W,H);
+    ctx.save();body();ctx.closePath();ctx.clip();
+    ctx.globalAlpha=.14;ctx.fillStyle=col['--amber'];ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;
+    var y=206;layers.forEach(function(l,i){if(l.h<.3)return;var top=y-l.h,last=!layers.slice(i+1).some(function(q){return q.h>=.3;});
+      ctx.beginPath();ctx.moveTo(118,y+1);if(last)wave(top,amp);else{ctx.lineTo(118,top);ctx.lineTo(22,top);}ctx.lineTo(22,y+1);ctx.closePath();
+      ctx.fillStyle=lc(l);ctx.globalAlpha=.92;ctx.fill();ctx.globalAlpha=1;
+      if(!last){var gg=ctx.createLinearGradient(0,top-5,0,top+5);gg.addColorStop(0,'rgba(255,255,255,0)');gg.addColorStop(.5,'rgba(255,255,255,'+(.22*(1-mix)).toFixed(3)+')');gg.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=gg;ctx.fillRect(22,top-5,96,10);}
+      y=top;});
+    ctx.globalAlpha=.22;ctx.fillStyle='#fff';ctx.beginPath();ctx.roundRect?ctx.roundRect(31,92,6,96,3):ctx.rect(31,92,6,96);ctx.fill();ctx.globalAlpha=1;
+    ctx.restore();
+    drops.forEach(function(d){if(d.d>0)return;ctx.fillStyle=d.c;ctx.beginPath();ctx.moveTo(70,d.y-7);ctx.bezierCurveTo(76,d.y-1,75,d.y+5,70,d.y+5);ctx.bezierCurveTo(65,d.y+5,64,d.y-1,70,d.y-7);ctx.fill();});
+    body();ctx.lineWidth=2;ctx.strokeStyle=col['--ink'];ctx.lineJoin='round';ctx.stroke();
+    ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(52,34);ctx.lineTo(88,34);ctx.stroke();
+    ctx.strokeStyle=col['--ink3'];ctx.lineWidth=1;for(var k=1;k<=3;k++){var yy=206-k*28;ctx.beginPath();ctx.moveTo(110,yy);ctx.lineTo(118,yy);ctx.stroke();}
+    ctx.strokeStyle=col['--ink3'];ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(66,0);ctx.lineTo(66,14);ctx.quadraticCurveTo(66,20,70,20);ctx.quadraticCurveTo(74,20,74,14);ctx.lineTo(74,0);ctx.stroke();}
+  function step(){t++;var moving=false;layers.forEach(function(l){var dlt=l.target-l.h;if(Math.abs(dlt)>.15){l.v=(l.v||0)*.72+dlt*.12;l.h+=l.v;moving=true;}else{l.h=l.target;l.v=0;}});
+    layers=layers.filter(function(l){return l.h>.2||l.target>0;});
+    drops.forEach(function(d){if(d.d>0){d.d--;return;}d.vy+=.55;d.y+=d.vy;if(d.y>=surf()-2){d.done=true;amp=4.5;if(d.cb)d.cb();}});drops=drops.filter(function(d){return !d.done;});
+    if(Math.abs(mixT-mix)>.004){mix+=(mixT-mix)*.045;moving=true;}else mix=mixT;tilt*=.9;energy*=.975;if(Math.abs(tilt)>.002)moving=true;
+    amp*=.95;draw();raf=(active&&!REDUCE)||moving||drops.length?requestAnimationFrame(step):null;}
+  function kick(){if(REDUCE){layers.forEach(function(l){l.h=l.target;});layers=layers.filter(function(l){return l.target>0;});drops.forEach(function(d){if(d.cb)d.cb();});drops=[];draw();return;}if(!raf)raf=requestAnimationFrame(step);}
+  function shake(dx){tilt=Math.max(-.22,Math.min(.22,tilt+dx*.005));amp=Math.min(7,amp+Math.abs(dx)*.08);energy+=Math.abs(dx);
+    if(energy>240&&mixT===0&&layers.filter(function(l){return l.target>0;}).length>=2){mixT=1;SFX.swirl();hap([20,40,20,40,30]);if(onMix)onMix();}kick();}
+  cv.addEventListener('pointerdown',function(e){down=true;lx=e.clientX;amp=5;if(layers.length){SFX.clink();hap(10);}try{cv.setPointerCapture(e.pointerId);}catch(_){}kick();});
+  cv.addEventListener('pointermove',function(e){if(!down)return;var dx=e.clientX-lx;lx=e.clientX;if(dx)shake(dx);});
+  ['pointerup','pointercancel','pointerleave'].forEach(function(n){cv.addEventListener(n,function(){down=false;});});
+  size();cols();window.addEventListener('resize',function(){if(active){size();kick();}});
+  return {set:function(items,cap){var unit=112/Math.max(cap,1),keep={};var ns=items.map(function(it){return it.id+':'+it.drops;}).join('|');if(ns!==sig){sig=ns;mixT=0;mix=0;energy=0;}
+      blend=mixRGB(items);
+      items.forEach(function(it,i){keep[it.id]=1;var l=layers.filter(function(x){return x.id===it.id;})[0];if(!l){l={id:it.id,h:0,v:0};layers.push(l);}l.color=it.color;l.rgb=hex2rgb(it.color);l.target=it.drops*unit;l.ord=i;});
+      layers.forEach(function(l){if(!keep[l.id]){l.target=0;l.ord=l.ord==null?99:l.ord;}});layers.sort(function(a,b){return a.ord-b.ord;});kick();},
+    drop:function(color,delay,cb){if(REDUCE){if(cb)cb();return;}drops.push({c:color,y:24,vy:0,d:delay||0,cb:cb});kick();},
+    mixed:function(){return mixT===1;},onMix:function(f){onMix=f;},blend:function(){return blend.map(Math.round).join(',');},
+    theme:function(){cols();kick();},show:function(on){active=on;if(on){size();cols();kick();}}};})();
+var FX=(function(){var cv=$('fxCv'),ctx=cv.getContext('2d'),ps=[],raf=null,w=0,h=0;
+  function size(){var b=cv.parentNode,d=Math.min(window.devicePixelRatio||1,2);w=b.clientWidth;h=b.clientHeight;cv.width=w*d;cv.height=h*d;ctx.setTransform(d,0,0,d,0,0);}
+  function step(){ctx.clearRect(0,0,w,h);ps.forEach(function(p){if(p.d>0){p.d--;return;}p.l++;p.x+=p.vx;p.y+=p.vy;p.vy*=.994;p.vx+=.006;p.r+=.42;var a=Math.max(0,.36*(1-p.l/p.L)),g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);g.addColorStop(0,'rgba('+p.c+','+a.toFixed(3)+')');g.addColorStop(1,'rgba('+p.c+',0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.3);ctx.fill();});
+    ps=ps.filter(function(p){return p.l<p.L;});if(ps.length)raf=requestAnimationFrame(step);else{raf=null;ctx.clearRect(0,0,w,h);}}
+  return {puff:function(cols){if(REDUCE||!cols.length)return;size();var bc=$('bottleCv').getBoundingClientRect(),pr=cv.parentNode.getBoundingClientRect(),x0=bc.left-pr.left+bc.width/2,y0=bc.top-pr.top+bc.height*30/220;
+    for(var i=0;i<52;i++)ps.push({x:x0+(Math.random()-.5)*12,y:y0,vx:(Math.random()-.4)*.9,vy:-(.6+Math.random()*1.2),r:5+Math.random()*8,l:0,L:120+Math.random()*90,d:Math.floor(Math.random()*80),c:cols[i%cols.length]});if(!raf)raf=requestAnimationFrame(step);}};})();
+function bottleMsg(){var n=st.bottle.length;$('bmsg').textContent=!n?'':n<2?'ボトルに触れると揺れます':BT.mixed()?'混ざりました。「香らせる」を押してみてください':'ボトルを左右に振ると混ざります';}
+BT.onMix(function(){bottleMsg();});
+$('puffBtn').onclick=function(){if(!st.bottle.length){SFX.warn();toast('ボトルが空です');return;}SFX.mist(st.bottle.map(function(x){return byId[x.id];}));hap([30,70,30,70,30,70,40]);FX.puff(BT.mixed()?[BT.blend()]:st.bottle.map(function(x){return hex2rgb(fcol(byId[x.id])).join(',');}));};
+var holdT=null;function stopHold(){if(holdT){clearInterval(holdT);holdT=null;}}
+window.addEventListener('pointerup',stopHold);window.addEventListener('pointercancel',stopHold);window.addEventListener('blur',stopHold);
+/* ---- 小瓶の棚：タップで1滴、長押しで連続 ---- */
+var benchSig='',BP='M15 14v6c0 5-11 5-11 13v34a5 5 0 0 0 5 5h26a5 5 0 0 0 5-5V33c0-8-11-8-11-13v-6z';
+function benchList(){var ids=[],p=pById[st.goal];function add(id,force){var o=byId[id];if(o&&ids.indexOf(id)<0&&(force||!blocked(o)))ids.push(id);}
+  st.have.forEach(function(i){add(i);});
+  if(p)p.oils.slice(0,8).forEach(function(i){add(i);});
+  if(!ids.length)try{starter(5).picks.forEach(function(x){add(x.id);});}catch(e){}
+  st.bottle.forEach(function(x){add(x.id,true);});
+  return ids.slice(0,26).map(function(i){return byId[i];});}
+function miniHtml(o,i){var c=fcol(o);return '<button class="mb'+(st.have.indexOf(o.id)>=0?'':' no')+'" data-q data-o="'+esc(o.id)+'" aria-label="'+esc(o.name)+'を1滴"><i class="bd"></i><svg viewBox="0 0 44 76"><defs><clipPath id="mbc'+i+'"><path d="'+BP+'"/></clipPath></defs><g clip-path="url(#mbc'+i+')"><rect x="0" y="0" width="44" height="76" fill="var(--amber)" opacity=".18"/><rect x="0" y="26" width="44" height="50" fill="'+c+'"/><rect x="8" y="30" width="3.5" height="34" rx="1.7" fill="#fff" opacity=".32"/></g><path d="'+BP+'" fill="none" stroke="var(--ink)" stroke-width="1.6"/><rect x="12" y="3" width="20" height="11" rx="2.5" fill="var(--ink)"/></svg><span class="nm">'+esc(sn(o))+'</span></button>';}
+function updBadges(){document.querySelectorAll('#mshelf .mb[data-o]').forEach(function(b){var x=st.bottle.filter(function(q){return q.id===b.getAttribute('data-o');})[0],bd=b.querySelector('.bd');b.classList.toggle('in',!!x);if(x){bd.textContent=x.drops;bd.classList.add('on');}else bd.classList.remove('on');});}
+function renderBench(){var host=$('mshelf');if(!host)return;var list=benchList(),sig=list.map(function(o){return o.id+(st.have.indexOf(o.id)>=0?'+':'');}).join('|');if(sig===benchSig){updBadges();return;}benchSig=sig;var sx=host.scrollLeft;
+  host.innerHTML=list.map(miniHtml).join('')+'<button class="mb" data-q data-plus aria-label="ほかの精油から選ぶ"><svg viewBox="0 0 44 76"><path d="'+BP+'" fill="none" stroke="var(--ink3)" stroke-width="1.5" stroke-dasharray="3 3"/><rect x="12" y="3" width="20" height="11" rx="2.5" fill="none" stroke="var(--ink3)" stroke-width="1.4" stroke-dasharray="3 3"/><path d="M22 40v16M14 48h16" stroke="var(--ink2)" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg><span class="nm">ほかの精油</span></button>';
+  host.scrollLeft=sx;updBadges();}
+function flyDrop(b,color){if(REDUCE||!b.animate)return;var cr=$('bottleCv').getBoundingClientRect(),br=b.getBoundingClientRect(),sx=br.left+br.width/2,sy=br.top+8,ex=cr.left+cr.width/2,ey=cr.top+cr.height*24/220,d=document.createElement('i');d.className='fly';d.style.background=color;document.body.appendChild(d);
+  var a=d.animate([{transform:'translate('+(sx-5)+'px,'+(sy-6)+'px) scale(1,1)',offset:0},{transform:'translate('+((sx+ex)/2-5)+'px,'+(Math.min(sy,ey)-46)+'px) scale(.9,1.25)',offset:.5},{transform:'translate('+(ex-5)+'px,'+(ey-6)+'px) scale(.75,1)',offset:1}],{duration:190,easing:'cubic-bezier(.3,.1,.5,1)'});a.onfinish=function(){d.remove();};}
+function benchAdd(b){var o=byId[b.getAttribute('data-o')];if(!o)return false;var x=st.bottle.filter(function(q){return q.id===o.id;})[0];
+  if(!x){if(st.bottle.length>=4){SFX.warn();hap(30);toast('混ぜすぎると香りがぼやけるため、4種までです');return false;}x={id:o.id,drops:1};st.bottle.push(x);}
+  else{if(x.drops>=9){SFX.warn();hap(30);return false;}x.drops++;}
+  SFX.oil(o,x.drops);hap(14);flyDrop(b,fcol(o));renderBottle(false,o.id,false,REDUCE?0:11);return true;}
+(function(){var host=$('mshelf'),tm=null,iv=null,fired=false,moved=false,sx=0,sy=0,cur=null;
+  function stop(){clearTimeout(tm);clearInterval(iv);tm=iv=null;}
+  host.addEventListener('pointerdown',function(e){var b=e.target.closest('.mb');if(!b||e.button>0)return;cur=b;fired=false;moved=false;sx=e.clientX;sy=e.clientY;stop();if(b.hasAttribute('data-plus'))return;
+    tm=setTimeout(function(){fired=true;if(!benchAdd(b)){stop();return;}iv=setInterval(function(){if(!benchAdd(b))stop();},250);},380);});
+  host.addEventListener('pointermove',function(e){if(!cur)return;if(Math.abs(e.clientX-sx)>9||Math.abs(e.clientY-sy)>9){moved=true;stop();}});
+  function up(e){if(!cur)return;var b=cur;cur=null;var was=fired,mv=moved;stop();if(e.type==='pointerup'&&!mv&&!was){if(b.hasAttribute('data-plus')){SFX.clink();openPicker();}else benchAdd(b);}}
+  ['pointerup','pointercancel','pointerleave'].forEach(function(n){host.addEventListener(n,up);});
+  host.addEventListener('contextmenu',function(e){e.preventDefault();});})();
+function renderBottle(pop,dropId,keepSlots,delay){
+  st.bottle=st.bottle.filter(function(x){return x&&byId[x.id];});sv('aro3.bottle',st.bottle);sv('aro3.goal',st.goal||'');
+  var items=st.bottle,tot=items.reduce(function(a,x){return a+x.drops;},0),T=totalFor(items.length>1?'blend':'solo');
+  var order=items.slice().sort(function(a,b){return b.drops-a.drops;}).map(function(x){return {id:x.id,drops:x.drops,color:fcol(byId[x.id])};}),cap=Math.max(T+2,tot);
+  if(dropId&&byId[dropId])BT.drop(fcol(byId[dropId]),delay||0,function(){BT.set(order,cap);SFX.plop();});
+  else{BT.set(order,cap);if(pop===true&&items.length)items.forEach(function(x,i){BT.drop(fcol(byId[x.id]),i*9);});}
+  $('bhint').hidden=!!items.length;
+  var p=pById[st.goal],s=$('slots');bottleMsg();if(!keepSlots){s.innerHTML='';
+  items.forEach(function(x,i){var o=byId[x.id],c=chk(o),r=document.createElement('div');r.className='slot';
+    r.innerHTML='<span class="drop" style="background:'+fcol(o)+'"></span><div class="n">'+esc(sn(o))+(p?roleTag(p,o.id):'')+'<small>'+esc(flab(o))+(o.strong?'、強い香り':'')+(c.level?'　<span class="warn">⚠ '+esc(c.reasons.join('/'))+'</span>':'')+(disliked(o)?'　<span class="warn">苦手な系統</span>':'')+'</small></div><div class="step"><button data-d="-1" aria-label="減らす">−</button><span>'+x.drops+'</span><button data-d="1" aria-label="増やす">＋</button></div><button class="iconbtn" style="width:34px;height:34px" data-x aria-label="外す">✕</button>';
+    r.querySelectorAll('[data-d]').forEach(function(b){var dv=Number(b.getAttribute('data-d'));b.setAttribute('data-q','');
+      function act(){var nv=Math.max(1,Math.min(9,x.drops+dv));if(nv===x.drops){SFX.warn();hap(30);return false;}x.drops=nv;r.querySelector('.step span').textContent=nv;if(dv>0){SFX.oil(o,nv);hap(16);}else{SFX.remove();hap(10);}renderBottle(false,dv>0?x.id:null,true);return true;}
+      b.onclick=function(e){if(e.detail===0)act();};
+      b.onpointerdown=function(e){if(e.button)return;act();stopHold();if(dv>0)holdT=setInterval(function(){if(!act())stopHold();},330);};
+      b.onpointerleave=stopHold;});
+    r.querySelector('[data-x]').setAttribute('data-q','');r.querySelector('[data-x]').onclick=function(){SFX.remove();hap(25);st.bottle.splice(i,1);renderBottle();};s.appendChild(r);});}
+  var cp=compat(items.map(function(x){return byId[x.id];})),warn=[];
+  if(tot>T)warn.push('目安より'+(tot-T)+'滴多めです');
+  var capS=roomKey()==='L'?2:1;items.forEach(function(x){if(byId[x.id].strong&&items.length>1&&x.drops>capS)warn.push(sn(byId[x.id])+'は強い香りです（'+capS+'滴まで推奨）');});
+  if(p&&items.length&&!items.some(function(x){return supOf(p,x.id)==='verified_human';}))warn.push('この目的で根拠のある精油が入っていません');
+  $('tot').innerHTML='<div class="total'+(dropId||pop?' bump':'')+'">'+tot+'<small>滴</small></div><div class="note">目安は'+T+'滴まで</div>';$('meter').innerHTML='<div class="mtrack"><i style="width:'+Math.min(100,Math.round(tot/Math.max(T,1)*100))+'%;'+(tot>T?'background:var(--warn)':'')+'"></i></div><div class="note">香りの相性　'+compatLabel(cp)+'</div>'+warn.map(function(w){return '<div class="warn">⚠ '+esc(w)+'</div>';}).join('');
+  $('usage').textContent=items.length?'滴数と相性は調香の経験則による目安です。30〜60分使ったら休み、換気を。機種の説明書の上限を優先してください。':'上のレシピを「ボトルに入れる」か、下の小瓶をタップして足してください。';
+  renderBench();
+}
+$('clearBottle').setAttribute('data-q','');$('clearBottle').onclick=function(){if(st.bottle.length){SFX.remove();hap(25);}st.bottle=[];renderBottle();};
+function openPicker(){if(st.bottle.length>=4){toast('混ぜすぎると香りがぼやけるため、4種までです');return;}pushSheet(drawPicker);}
+function drawPicker(){showSheet(sheetHead('精油を足す','最大4種')+'<input class="search" id="pq" placeholder="検索" style="margin:10px 0"><div id="pl"></div>',function(el){wireSheet(el);var pl=el.querySelector('#pl'),p=pById[st.goal],cur=st.bottle.map(function(x){return byId[x.id];});
+  function r(){var q=el.querySelector('#pq').value.trim().toLowerCase();pl.innerHTML='';oils.filter(function(o){return !blocked(o)&&!st.bottle.some(function(x){return x.id===o.id;})&&(!q||(o.name+o.profile+flab(o)).toLowerCase().indexOf(q)>=0);}).map(function(o){var s=0;cur.forEach(function(c){s+=pairScore(o,c);});if(p&&p.oils.indexOf(o.id)>=0)s+=3;return {o:o,s:s};}).sort(function(a,b){return b.s-a.s;}).slice(0,60).forEach(function(x,i){var b=oilRow(x.o,i,p&&p.oils.indexOf(x.o.id)>=0?p:null);b.addEventListener('click',function(e){e.stopImmediatePropagation();},true);b.onclick=null;var nb=b.cloneNode(true);nb.onclick=function(){st.bottle.push({id:x.o.id,drops:1});SFX.oil(x.o,1,.2);hap(16);closeSheet();renderBottle(false,x.o.id);};pl.appendChild(nb);});}
+  el.querySelector('#pq').addEventListener('input',r);r();});}
+$('saveR').onclick=function(){if(!st.bottle.length){toast('ボトルが空です');return;}var n=$('rname').value.trim()||(pById[st.goal]?pById[st.goal].title+'｜自作':'自作ブレンド');addBook(n,st.goal,st.bottle);$('rname').value='';buzz();toast('レシピ帳に記録しました');};
+function renderBook(){var r=$('recipes');r.innerHTML='';if(!st.book.length){r.innerHTML='<div class="empty">まだ記録がありません。レシピの「使った・記録する」から追加できます。</div>';return;}
+ st.book.forEach(function(x,i){var d=document.createElement('div');d.className='rc';
+  d.innerHTML=miniBottle(x.items.filter(function(it){return byId[it.id];}),'mbw')+'<div class="k">'+esc(x.date||'')+'</div><h4>'+esc(x.n)+'</h4><div class="parts">'+x.items.map(function(it){var o=byId[it.id];return o?'<span class="part"><i style="background:'+fcol(o)+'"></i>'+esc(sn(o))+' <b>'+it.drops+'</b></span>':''; }).join('')+'</div><div class="stars" role="group" aria-label="評価">'+[1,2,3,4,5].map(function(n){return '<button data-q class="'+(x.star>=n?'on':'')+'" data-s="'+n+'" aria-label="★'+n+'">★</button>';}).join('')+'</div><textarea class="search" placeholder="メモ（どう感じたか、濃さ、時間帯など）" style="margin-top:6px">'+esc(x.memo||'')+'</textarea><div class="acts"><button class="btn sm" data-l>ボトルに入れる</button><button class="btn sm ghost" data-d>削除</button></div>';
+
+  d.querySelectorAll('[data-s]').forEach(function(b){b.onclick=function(){var n=Number(b.getAttribute('data-s'));x.star=x.star===n?0:n;sv('aro3.book',st.book);if(x.star){SFX.chime(x.star);hap([10,40,10,40,18]);}else SFX.off();renderBook();var nb=$('recipes').children[i];if(nb&&x.star)nb.querySelectorAll('.stars button.on').forEach(function(q,qi){q.classList.add('pop');q.style.animationDelay=qi*45+'ms';});if(pById[st.goal])renderGoal();};});
+  d.querySelector('textarea').addEventListener('change',function(e){x.memo=e.target.value;sv('aro3.book',st.book);});
+  d.querySelector('[data-l]').onclick=function(){st.bottle=x.items.map(function(it){return {id:it.id,drops:it.drops};});if(x.pid){st.goal=x.pid;renderGoal();}renderBottle(true);$('bottle').scrollIntoView({behavior:'smooth',block:'center'});};
+  d.querySelector('[data-d]').onclick=function(){st.book.splice(i,1);sv('aro3.book',st.book);renderBook();};r.appendChild(d);});}
+/* breath */
+var br={on:false,t:0,timer:null};
+function renderBreathScent(){var p=pById.rumination,el=$('bscent');el.innerHTML='<div class="glabel">合図に使える香り<small>根拠は呼吸・マインドフルネス側</small></div>';p.oils.forEach(function(i,k){if(!blocked(byId[i]))el.appendChild(oilRow(byId[i],k));});}
+function fmt(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
+var MS=(function(){var cv=$('mistCv'),ctx=cv.getContext('2d'),S=280,ps=[],t=0,phase=.25,dir=0,raf=null,active=false,last=0;
+  for(var i=0;i<54;i++)ps.push({a:Math.random()*6.283,s:.4+Math.random()*.9,o:Math.random()*6.283,j:.4+Math.random(),r:20+Math.random()*22,k:i});
+  function size(){var d=Math.min(window.devicePixelRatio||1,2);cv.width=S*d;cv.height=S*d;ctx.setTransform(d,0,0,d,0,0);}
+  function cols(){var c=st.bottle.map(function(x){return fcol(byId[x.id]);});return c.length?c:[FAM.herbal[1],FAM.citrus[1],FAM.woody[1]];}
+  function draw(){var c=cols();ctx.clearRect(0,0,S,S);var R=46+phase*58;
+    ps.forEach(function(p){var a=p.a+t*.0016*p.s,rr=R+Math.sin(t*.012+p.o)*10*p.j,x=S/2+Math.cos(a)*rr,y=S/2+Math.sin(a)*rr,r=p.r*(.8+phase*.5),g=ctx.createRadialGradient(x,y,0,x,y,r),cl=c[p.k%c.length];
+      g.addColorStop(0,cl+'55');g.addColorStop(1,cl+'00');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,6.283);ctx.fill();});}
+  function step(ts){var dt=last?Math.min(.05,(ts-last)/1000):.016;last=ts;t+=dt*60;if(dir>0)phase=Math.min(1,phase+dt/4);else if(dir<0)phase=Math.max(0,phase-dt/6);else phase+=( .25-phase)*.03;draw();raf=active?requestAnimationFrame(step):null;}
+  size();
+  return {dir:function(d){dir=d;},show:function(on){active=on&&!REDUCE;last=0;if(on){size();if(REDUCE){phase=.5;draw();}else if(!raf)raf=requestAnimationFrame(step);}}};})();
+function stopBreath(){br.on=false;clearInterval(br.timer);MS.dir(0);$('bstart').textContent='はじめる';$('blbl').innerHTML='準備<small>3:00</small>';}
+$('bstart').onclick=function(){if(br.on){stopBreath();return;}br.on=true;br.t=0;$('bstart').textContent='やめる';
+  function tick(){var T=180-br.t;if(T<=0){stopBreath();$('blbl').innerHTML='おつかれさま<small>完了</small>';return;}var ph=br.t%10;MS.dir(ph<4?1:-1);if(ph===0)hap(70);if(ph===4)hap([35,90,35]);SFX.breath(ph);
+    $('blbl').innerHTML=(ph<4?'吸って':'吐いて')+'<small>'+fmt(T)+'</small>';br.t++;}
+  tick();br.timer=setInterval(tick,1000);};
+/* settings */
+var ROOMS=[['S','〜6畳'],['M','8〜12畳'],['L','13畳〜']];
+function swRows(host){host.innerHTML='';SAFE.forEach(function(d){var r=document.createElement('div');r.className='sw-row';r.innerHTML='<span>'+d[1]+'</span><button class="switch'+(st.safety[d[0]]?' on':'')+'" role="switch" aria-checked="'+(!!st.safety[d[0]])+'" aria-label="'+d[1]+'"></button>';r.querySelector('button').setAttribute('data-q','');r.querySelector('button').onclick=function(){st.safety[d[0]]=!st.safety[d[0]];sv('aro3.safety',st.safety);if(st.safety[d[0]])SFX.on();else SFX.off();hap(14);swRows(host);refresh();};host.appendChild(r);});}
+function feelRows(){var host=$('feelSw');host.innerHTML='';[['sound','効果音'],['bgm','ヒーリング音楽'],['haptic','振動']].forEach(function(d){var r=document.createElement('div');r.className='sw-row';r.innerHTML='<span>'+d[1]+'</span><button data-q class="switch'+(st[d[0]]?' on':'')+'" role="switch" aria-checked="'+(!!st[d[0]])+'" aria-label="'+d[1]+'"></button>';r.querySelector('button').onclick=function(){st[d[0]]=!st[d[0]];sv('aro3.'+d[0],st[d[0]]);if(st[d[0]]){SFX.on();hap(20);}if(d[0]==='bgm'){SFX.bgm(st.bgm);bgmIcon();}feelRows();sndIcon();};host.appendChild(r);});
+  var vr=document.createElement('div');vr.className='sw-row';vr.innerHTML='<span>音楽の大きさ</span><input type="range" class="vol" min="0" max="100" value="'+Math.round((st.bgvol==null?.6:st.bgvol)*100)+'" aria-label="音楽の大きさ">';var rg=vr.querySelector('input');rg.oninput=function(){st.bgvol=rg.value/100;SFX.bgvol();};rg.onchange=function(){sv('aro3.bgvol',st.bgvol);};host.appendChild(vr);}
+function sndIcon(){$('sndBtn').innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/>'+(st.sound?'<path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>':'<path d="M17 9l5 6M22 9l-5 6"/>')+'</svg>';$('sndBtn').setAttribute('aria-pressed',String(!!st.sound));}
+function bgmIcon(){var b=$('bgmBtn');b.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>'+(st.bgm?'':'<path d="M3 3l18 18"/>')+'</svg>';b.classList.toggle('lit',!!st.bgm);b.setAttribute('aria-pressed',String(!!st.bgm));}
+$('bgmBtn').setAttribute('data-q','');$('bgmBtn').onclick=function(){st.bgm=!st.bgm;sv('aro3.bgm',st.bgm);if(st.bgm){SFX.on();}SFX.bgm(st.bgm);bgmIcon();feelRows();toast(st.bgm?'ヒーリング音楽を流します':'音楽を止めました');};
+bgmIcon();if(st.bgm){var once=function(){document.removeEventListener('pointerdown',once,true);if(st.bgm)SFX.bgm(true);};document.addEventListener('pointerdown',once,true);}
+$('sndBtn').setAttribute('data-q','');$('sndBtn').onclick=function(){st.sound=!st.sound;sv('aro3.sound',st.sound);if(st.sound)SFX.on();sndIcon();feelRows();toast(st.sound?'音をオンにしました':'音をオフにしました');};
+function famRows(host){host.innerHTML='';Object.keys(FAM).forEach(function(k){var off=st.dislike.indexOf(k)>=0,b=document.createElement('button');b.className='fam'+(off?' off':'');b.innerHTML='<span class="drop" style="background:'+FAM[k][1]+'"></span><span class="t">'+FAM[k][0]+'<small>'+FAM[k][2]+'</small></span><span class="st">'+(off?'苦手':'OK')+'</span>';b.onclick=function(){var i=st.dislike.indexOf(k);if(i>=0)st.dislike.splice(i,1);else st.dislike.push(k);sv('aro3.dislike',st.dislike);buzz();famRows(host);refresh();};host.appendChild(b);});}
+function roomRows(host){host.innerHTML='';ROOMS.forEach(function(r){var b=document.createElement('button');b.className='chip'+(st.room===r[0]?' on':'');b.textContent=r[1];b.onclick=function(){st.room=r[0];sv('aro3.room',st.room);buzz();roomRows(host);refresh();};host.appendChild(b);});}
+function renderSettings(){feelRows();swRows($('safeSw'));famRows($('famPref'));roomRows($('roomChips'));}
+function renderSafebar(){var act=SAFE.filter(function(d){return st.safety[d[0]];});var parts=act.map(function(d){return '<span class="pill">'+d[1].replace('がいる','')+'</span>';});if(st.dislike.length)parts.push('<span class="pill">苦手 '+st.dislike.length+'系統</span>');if(st.room)parts.push('<span class="pill">'+ROOMS.filter(function(r){return r[0]===st.room;})[0][1]+'</span>');
+  $('safebar').innerHTML=parts.length?'設定　'+parts.join('')+'<span class="link" style="margin-left:auto">変更</span>':'安全・苦手な香り・部屋の広さは未設定です<span class="link" style="margin-left:auto">設定する</span>';}
+function refresh(){renderSafebar();renderHome();renderLib();renderGoal();renderBottle();renderShelf();renderBreathScent();}
+function drawSetup(){var h=sheetHead('はじめに','3つだけ教えてください。あとで変更できます');
+  h+='<div class="glabel">当てはまるものをオンに</div><p class="privacy">この情報は、このスマホの中だけに保存されます（どこにも送信されません）。</p><div class="card" id="su1" style="padding-block:4px"></div><div class="glabel">苦手な香りをタップ</div><div id="su2"></div><div class="glabel">使う部屋の広さ</div><div class="chips" id="su3"></div><button class="btn" data-done style="width:100%;margin-top:12px">この設定で始める</button>';
+  showSheet(h,function(el){wireSheet(el);swRows(el.querySelector('#su1'));famRows(el.querySelector('#su2'));roomRows(el.querySelector('#su3'));
+    function done(){st.setup=true;sv('aro3.setup',true);renderSettings();closeSheet();}
+    el.querySelector('[data-done]').onclick=done;el.querySelector('[data-close]').onclick=done;});}
+$('resetup').onclick=function(){pushSheet(drawSetup);};
+function applyTheme(){var r=document.documentElement;if(st.theme==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',st.theme);}
+$('themeBtn').onclick=function(){var cur=st.theme==='auto'?(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):st.theme;st.theme=cur==='dark'?'light':'dark';sv('aro2.theme',st.theme);applyTheme();BT.theme();};
+var TABS=[['home','さがす','<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'],['blend','調香','<path d="M9 3h6M10 3v5l-5 9a3 3 0 0 0 3 4h8a3 3 0 0 0 3-4l-5-9V3"/><path d="M8 15h8"/>'],['lib','図鑑','<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/>'],['breath','呼吸','<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/>'],['safe','設定','<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>']];
+function go(id){document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('active',v.id==='v-'+id);});var ix=0;document.querySelectorAll('.tab').forEach(function(t,i){var on=t.getAttribute('data-id')===id;t.classList.toggle('on',on);t.setAttribute('aria-selected',String(on));if(on)ix=i;});$('tpill').style.transform='translateX('+(ix*100)+'%)';window.scrollTo(0,0);if(id!=='breath'&&br.on)stopBreath();if(id==='safe')renderSettings();BT.show(id==='blend');MS.show(id==='breath');}
+var tb=$('tabs');tb.innerHTML='<span class="pill" id="tpill"></span>';TABS.forEach(function(t){var b=document.createElement('button');b.className='tab'+(t[0]==='home'?' on':'');b.setAttribute('role','tab');b.setAttribute('aria-selected',String(t[0]==='home'));b.setAttribute('data-id',t[0]);b.innerHTML='<svg viewBox="0 0 24 24">'+t[2]+'</svg>'+t[1];b.onclick=function(){buzz();go(t[0]);};tb.appendChild(b);});
+$('safebar').onclick=function(){go('safe');};
+/* 背景：うっすらとした枝葉と、水面の輪 */
+(function(){var h=$('nat');function leafBranch(w,hh,rev){var p=[[w,0],[w*.55,hh*.08],[w*.35,hh*.45],[0,hh]],s='';function pt(t){var u=1-t;return [u*u*u*p[0][0]+3*u*u*t*p[1][0]+3*u*t*t*p[2][0]+t*t*t*p[3][0],u*u*u*p[0][1]+3*u*u*t*p[1][1]+3*u*t*t*p[2][1]+t*t*t*p[3][1]];}
+    var st0=pt(0);s+='<path d="M'+p[0][0]+','+p[0][1]+' C'+p[1][0]+','+p[1][1]+' '+p[2][0]+','+p[2][1]+' '+p[3][0]+','+p[3][1]+'" fill="none" stroke-width="2.2" stroke-linecap="round"/>';
+    for(var i=1;i<=11;i++){var t=i/12,a=pt(t),b=pt(t+.02),ang=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI,sc=1.15-t*.55;[1,-1].forEach(function(sd,k){var L=(i%2?30:26)*sc,wd=8.5*sc;s+='<ellipse cx="'+(L*.5+4)+'" cy="0" rx="'+L*.5+'" ry="'+wd*.5+'" transform="translate('+a[0].toFixed(1)+' '+a[1].toFixed(1)+') rotate('+(ang+sd*(48+i*2.2)).toFixed(1)+')" stroke="none"/>';});}
+    if(rev)s='<g transform="translate('+w+' '+hh+') scale(-1 -1)">'+s+'</g>';return '<svg viewBox="0 0 '+w+' '+hh+'" class="'+(rev?'nb2':'nb1')+'">'+s+'</svg>';}
+  h.innerHTML=leafBranch(260,300,false)+leafBranch(260,300,true)+'<div class="rg"><i></i><i></i><i></i></div>';})();
+/* タイトル画面：触れると水の波紋が広がり、アプリが現れる */
+var INTRO=(function(){if(ld('aro3.introDay','')===new Date().toDateString()){var bx=$('intro');if(bx&&bx.parentNode)bx.parentNode.removeChild(bx);return {then:function(f){f();}};}
+  var box=$('intro'),cv=$('introCv'),ctx=cv.getContext('2d'),W=0,H=0,t=0,rip=[],fl=[],raf=0,state=0,ox=0,oy=0,t0=0,maxR=0,cbs=[],fin=false,RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+  function size(){var d=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;cv.width=Math.round(W*d);cv.height=Math.round(H*d);ctx.setTransform(d,0,0,d,0,0);fl=[];for(var i=0;i<26;i++)fl.push({x:Math.random()*W,y:Math.random()*H*.78,r:1+Math.random()*2,p:Math.random()*6.28,s:.5+Math.random()*.7,a:.35+Math.random()*.5});}
+  function done(){if(fin)return;fin=true;cancelAnimationFrame(raf);if(box.parentNode)box.parentNode.removeChild(box);cbs.forEach(function(f){f();});cbs=[];}
+  function draw(now){t++;ctx.clearRect(0,0,W,H);
+    var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#08191f');g.addColorStop(.55,'#0e302f');g.addColorStop(1,'#175040');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    var m=ctx.createRadialGradient(W*.74,H*.2,0,W*.74,H*.2,W*.8);m.addColorStop(0,'rgba(226,244,232,.17)');m.addColorStop(1,'rgba(226,244,232,0)');ctx.fillStyle=m;ctx.fillRect(0,0,W,H);
+    for(var i=0;i<9;i++){var y=H*.58+i*H*.05,a=.035+i*.007;ctx.beginPath();for(var x=0;x<=W+12;x+=12){var yy=y+Math.sin(x*.012+t*.012*(1+i*.1)+i)*(2+i*.7);if(x)ctx.lineTo(x,yy);else ctx.moveTo(x,yy);}ctx.strokeStyle='rgba(200,236,224,'+a.toFixed(3)+')';ctx.lineWidth=1;ctx.stroke();}
+    var mx=W*.74,my=H*.58+H*.03;for(var k=0;k<7;k++){var yy2=my+k*H*.032,ww=(34-k*3.2)*(1+Math.sin(t*.02+k)*.12);ctx.fillStyle='rgba(226,244,232,'+(.16-k*.02).toFixed(3)+')';ctx.fillRect(mx-ww,yy2,ww*2,1.6);}
+    if(!RM&&state===0&&(t%170===1||t===20))rip.push({x:W*(.18+Math.random()*.64),y:H*(.64+Math.random()*.28),r:0,a:.32,v:.55,e:.42,w:1.4});
+    rip.forEach(function(r){r.r+=r.v;r.a*=.988;ctx.beginPath();ctx.ellipse(r.x,r.y,r.r,r.r*r.e,0,0,6.283);ctx.strokeStyle='rgba(214,244,232,'+r.a.toFixed(3)+')';ctx.lineWidth=r.w;ctx.stroke();});rip=rip.filter(function(r){return r.a>.01;});
+    fl.forEach(function(f){f.p+=.012*f.s;var x=f.x+Math.sin(f.p)*16,y=f.y+Math.cos(f.p*.8)*12,al=f.a*(.5+.5*Math.sin(f.p*2.2));var q=ctx.createRadialGradient(x,y,0,x,y,f.r*7);q.addColorStop(0,'rgba(236,250,200,'+al.toFixed(3)+')');q.addColorStop(1,'rgba(236,250,200,0)');ctx.fillStyle=q;ctx.beginPath();ctx.arc(x,y,f.r*7,0,6.283);ctx.fill();});
+    if(state===1&&!RM){var p=Math.min(1,(performance.now()-t0)/2100),e=1-Math.pow(1-p,2),R=e*maxR;
+      var mk='radial-gradient(circle at '+ox+'px '+oy+'px,transparent '+Math.max(0,R-1).toFixed(1)+'px,#000 '+(R+28).toFixed(1)+'px)';box.style.webkitMaskImage=mk;box.style.maskImage=mk;
+      for(var j=0;j<3;j++){var rr=R+16+j*36;ctx.beginPath();ctx.arc(ox,oy,rr,0,6.283);ctx.strokeStyle='rgba(232,252,242,'+((1-p)*.55/(j+1)).toFixed(3)+')';ctx.lineWidth=2.4-j*.6;ctx.stroke();}
+      if(p>=1){done();return;}}
+    raf=requestAnimationFrame(draw);}
+  function go(x,y){if(state)return;state=1;sv('aro3.introDay',new Date().toDateString());ox=x;oy=y;t0=performance.now();maxR=Math.hypot(Math.max(x,W-x),Math.max(y,H-y))+70;box.classList.add('go');
+    SFX.plop();SFX.plop(.22);SFX.chime(3);hap([18,50,18]);if(st.bgm)SFX.bgm(true);
+    if(RM){box.style.transition='opacity .6s';box.style.opacity='0';setTimeout(done,650);}}
+  size();window.addEventListener('resize',function(){if(!fin&&!state)size();});
+  box.addEventListener('pointerdown',function(e){go(e.clientX,e.clientY);});
+  box.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go(W/2,H*.6);}});
+  draw();try{box.focus({preventScroll:true});}catch(_){}
+  return {then:function(f){if(fin)f();else cbs.push(f);}};})();
+/* Android「戻る」：シート→前のシート→ホーム→（もう一度で終了） */
+(function(){var armed=false;try{history.replaceState({al:'root'},'');history.pushState({al:'guard'},'');}catch(e){return;}
+  window.addEventListener('popstate',function(){var intro=$('intro');if(intro){try{history.pushState({al:'guard'},'');}catch(e){}return;}
+    var on=$('sheet').classList.contains('on'),tab=document.querySelector('.tab.on'),cur=tab?tab.getAttribute('data-id'):'home';
+    if(on){if(stack.length>1)back();else closeSheet();}
+    else if(cur!=='home'){go('home');}
+    else{if(!armed){armed=true;toast('もう一度「戻る」で終了します');setTimeout(function(){armed=false;try{history.pushState({al:'guard'},'');}catch(e){}},2200);}return;}
+    try{history.pushState({al:'guard'},'');}catch(e){}});})();
+applyTheme();sndIcon();renderSettings();renderBook();refresh();
+INTRO.then(function(){if(!st.setup)setTimeout(function(){pushSheet(drawSetup);},250);});
+})();
+</script>
+<script>
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+</script>
+</body>
+</html>
