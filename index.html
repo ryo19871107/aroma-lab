@@ -311,6 +311,23 @@ summary{padding-block:11px;font-size:13.5px}
 .privacy{font-size:12px;color:var(--ink3);margin:-4px 0 8px}
 .glab2 small{font-size:12px}
 .stab{min-height:42px}
+
+/* v13: recipes from owned oils */
+.own-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:18px 0 2px}
+.own-h h3{margin:0;font-family:var(--display);font-weight:400;font-size:17px;letter-spacing:.04em}
+.own-h small{font-size:12px;color:var(--ink3)}
+.own-sub{font-size:13px;font-weight:700;color:var(--ink2);margin:14px 0 0}
+.own-sub small{font-weight:400;color:var(--ink3);margin-left:6px}
+.oc .dl{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13.5px;margin:2px 0 6px}
+.oc .dl span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.oc .dl i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.oc .dl b{font-variant-numeric:tabular-nums}
+.oc .ps{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 2px}
+.oc .ps button{font-size:12.5px;padding:6px 11px;min-height:36px;border-radius:99px;background:var(--sunk);color:var(--ink2)}
+.oc .need{font-size:13px;color:var(--glass);font-weight:700;margin:2px 0 4px}
+.oc .cmp{font-size:12px;color:var(--ink3)}
+.own-empty{background:var(--paper);border-radius:16px;padding:14px 16px;margin:10px 0;font-size:13.5px;color:var(--ink2)}
+.own-more{margin:2px 0 6px}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -338,6 +355,7 @@ summary{padding-block:11px;font-size:13.5px}
   <section class="view" id="v-blend">
     <div class="glabel" style="margin-top:6px">目的を選ぶ</div>
     <select class="search" id="goalSel"></select>
+    <div id="ownRecipes"></div>
     <div id="goalRecipes"></div>
     <div class="glabel">ボトルで調整する</div>
     <div class="bench"><canvas id="fxCv" class="fx" aria-hidden="true"></canvas>
@@ -690,7 +708,7 @@ function renderShelf(){var el=$('shelf'),own=st.have.map(function(i){return byId
   el.innerHTML=h;var sc=el.querySelector('.shelf-row2');
   el.querySelectorAll('.sb').forEach(function(b){b.setAttribute('data-q','');b.onclick=function(){if(b.classList.contains('plus')){SFX.clink();hap(10);pushSheet(drawHave);return;}SFX.clink();hap(10);openOil(byId[b.getAttribute('data-o')]);};});
   if(shelfShown)el.querySelectorAll('.liq').forEach(function(n){n.style.animation='none';});shelfShown=true;
-  $('starterBtn').onclick=function(){buzz();pushSheet(drawStarter);};}
+  $('starterBtn').onclick=function(){buzz();pushSheet(drawStarter);};renderOwn();}
 /* 持っている精油を選ぶ（タップで追加・外す） */
 function drawHave(){showSheet(sheetHead('持っている精油','タップで追加・外す')+'<input class="search" id="hq" placeholder="精油名で検索" style="margin:10px 0"><div id="hl"></div>',function(el){wireSheet(el);var hl=el.querySelector('#hl');
   function r(){var q=el.querySelector('#hq').value.trim().toLowerCase();hl.innerHTML='';
@@ -722,8 +740,57 @@ var FOK={citrus:['floral','woody','herbal','spice','resin','green','balsamic','e
 function pairScore(a,b){var ab=a.bw.indexOf(b.id)>=0,ba=b.bw.indexOf(a.id)>=0;if(ab&&ba)return 2;if(ab||ba)return 1;if(a.scentFamily===b.scentFamily||(FOK[a.scentFamily]||[]).indexOf(b.scentFamily)>=0)return .5;return -.5;}
 function compat(list){if(list.length<2)return null;var t=0,n=0;for(var i=0;i<list.length;i++)for(var j=i+1;j<list.length;j++){t+=pairScore(list[i],list[j]);n++;}return t/n;}
 function compatLabel(c){return c==null?'—':c>=1.5?'定番（互いに「合う」と記載）':c>=.8?'合うとされる':c>=.3?'系統としては無難':'記載なし（試してから）';}
+/* ---- 手持ちの精油で作れるレシピ ---- */
+var ownOpen={full:false,near:false,free:false},GW={A:4,B:3,C:2,D:1,X:0,N:0};
+var NW={'top':2,'top-middle':2,'middle':1.5,'middle-base':1,'base':1};
+function ownSet(){return st.have.filter(function(i){return byId[i]&&!blocked(byId[i]);});}
+function ownMatches(){var own=ownSet(),full={},near={},ps=st.goal&&pById[st.goal]?[pById[st.goal]]:P;
+  ps.forEach(function(p){recipesOf(p).forEach(function(r){if(!r.items.length)return;var ids=r.items.map(function(x){return x.id;}),miss=ids.filter(function(i){return own.indexOf(i)<0;});
+    var key=r.kind+':'+ids.slice().sort().join('+');
+    if(miss.length===0){(full[key]=full[key]||{r:r,ps:[]}).ps.push(p);}
+    else if(miss.length===1&&ids.length>=2&&!blocked(byId[miss[0]])){(near[key]=near[key]||{r:r,ps:[],miss:miss[0]}).ps.push(p);}});});
+  function rank(g){return Math.max.apply(null,g.ps.map(function(p){return GW[p.grade]||0;}))*10+g.r.items.length+(g.r.kind==='study'?.5:0);}
+  function list(o){return Object.keys(o).map(function(k){var g=o[k];g.ps.sort(function(a,b){return (GW[b.grade]||0)-(GW[a.grade]||0);});return g;}).sort(function(a,b){return rank(b)-rank(a);});}
+  return {own:own,full:list(full),near:list(near)};}
+function freeCombos(own,used){var out=[],T=totalFor('blend');
+  function add(ids){var key=ids.slice().sort().join('+');if(used[key])return;var os=ids.map(function(i){return byId[i];}),c=compat(os);if(c==null||c<(ids.length===2?1:.8))return;
+    out.push({ids:ids,score:c+(ids.length===3?.15:0),items:scale(ids.map(function(i){return [i,NW[byId[i].note]||1.5];}),Math.max(T,ids.length),false)});}
+  for(var a=0;a<own.length;a++)for(var b=a+1;b<own.length;b++){add([own[a],own[b]]);for(var c=b+1;c<own.length&&own.length<=14;c++)add([own[a],own[b],own[c]]);}
+  out.sort(function(x,y){return y.score-x.score;});
+  var seen={},res=[];out.forEach(function(x){var lead=x.ids.slice().sort().join('');if(res.length<8&&!seen[lead]){seen[lead]=1;res.push(x);}});return res;}
+function dlHtml(items){return '<div class="dl">'+items.map(function(x){var o=byId[x.id];return '<span><i style="background:'+fcol(o)+'"></i>'+esc(sn(o))+' <b>'+x.drops+'</b>滴</span>';}).join('')+'</div>';}
+function toBottle(items){items.forEach(function(x,i){SFX.oil(byId[x.id],x.drops,.2+i*.16);});hap([12,150,12,150,12]);st.bottle=items.map(function(x){return {id:x.id,drops:x.drops};});renderBottle(true);
+  var sg=document.querySelector('.stage');if(sg)sg.scrollIntoView({behavior:REDUCE?'auto':'smooth',block:'center'});}
+function ownCard(g,mode){var r=g.r,d=document.createElement('div');d.className='rc oc';
+  var title=r.kind==='study'?r.name:r.items.map(function(x){return sn(byId[x.id]);}).join(' ＋ ');
+  var h=miniBottle(r.items,'mbw')+'<div class="k">'+(mode==='near'?'あと1本で作れる｜':'')+KL[r.kind]+'</div><h4>'+esc(title)+'</h4>';
+  if(mode==='near'){var m=byId[g.miss];h+='<div class="need">足りない精油：'+esc(sn(m))+'</div>';}
+  h+=dlHtml(r.items)+'<div class="ps">'+g.ps.slice(0,6).map(function(p,i){return '<button data-p="'+i+'">'+GS[p.grade]+' '+esc(p.title)+'</button>';}).join('')+(g.ps.length>6?'<button data-p="more">ほか'+(g.ps.length-6)+'件</button>':'')+'</div>';
+  h+='<div class="acts">'+(mode==='near'?'<button class="btn sm ghost" data-m>'+esc(sn(byId[g.miss]))+'を見る</button><button class="btn sm ghost" data-b>試しにボトルへ</button>':'<button class="btn sm" data-b>ボトルに入れる</button>')+'</div>';
+  d.innerHTML=h;
+  d.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){var v=b.getAttribute('data-p');if(v==='more'){b.parentNode.innerHTML=g.ps.map(function(p,i){return '<button data-p="'+i+'">'+GS[p.grade]+' '+esc(p.title)+'</button>';}).join('');ownWire(d,g);return;}var p=g.ps[Number(v)];pushSheet(function(){drawPurpose(p);});};});
+  ownWire(d,g);return d;}
+function ownWire(d,g){d.querySelectorAll('.ps [data-p]').forEach(function(b){if(b.getAttribute('data-p')==='more')return;b.onclick=function(){var p=g.ps[Number(b.getAttribute('data-p'))];pushSheet(function(){drawPurpose(p);});};});
+  var bb=d.querySelector('[data-b]');if(bb)bb.onclick=function(){toBottle(g.r.items);};var mm=d.querySelector('[data-m]');if(mm)mm.onclick=function(){openOil(byId[g.miss]);};}
+function freeCard(x){var d=document.createElement('div');d.className='rc oc';
+  d.innerHTML=miniBottle(x.items,'mbw')+'<div class="k">手持ちの相性（経験則）</div><h4>'+esc(x.ids.map(function(i){return sn(byId[i]);}).join(' ＋ '))+'</h4>'+dlHtml(x.items)+'<div class="cmp">香りの相性：'+esc(compatLabel(x.score-(x.ids.length===3?.15:0)))+'</div><div class="acts"><button class="btn sm" data-b>ボトルに入れる</button></div>';
+  d.querySelector('[data-b]').onclick=function(){toBottle(x.items);};return d;}
+function renderOwn(){var host=$('ownRecipes');if(!host)return;host.innerHTML='';var gp=st.goal&&pById[st.goal];
+  var head='<div class="own-h"><h3>手持ちで作れるレシピ</h3><small>'+(gp?'「'+esc(gp.title)+'」にしぼり中':'すべての目的から')+'</small></div>';
+  var own=ownSet();
+  if(!own.length){host.innerHTML=head+'<div class="own-empty">持っている精油を登録すると、その組み合わせで作れるレシピがここに出ます。<div class="acts"><button class="btn sm" id="ownAdd">持っている精油を登録</button></div></div>';$('ownAdd').onclick=function(){pushSheet(drawHave);};return;}
+  var m=ownMatches(),used={};m.full.forEach(function(g){used[g.r.items.map(function(x){return x.id;}).sort().join('+')]=1;});
+  host.insertAdjacentHTML('beforeend',head);
+  function section(key,title,sub,arr,mk,limit){if(!arr.length)return;host.insertAdjacentHTML('beforeend','<div class="own-sub">'+title+'<small>'+sub+'</small></div>');
+    var lim=ownOpen[key]?arr.length:limit;arr.slice(0,lim).forEach(function(g){host.appendChild(mk(g));});
+    if(arr.length>limit){var b=document.createElement('button');b.className='link own-more';b.textContent=ownOpen[key]?'閉じる':'ほか'+(arr.length-limit)+'件を見る';b.onclick=function(){ownOpen[key]=!ownOpen[key];renderOwn();};host.appendChild(b);}}
+  section('full','いまの手持ちで作れる','根拠の印は目的ごと',m.full,function(g){return ownCard(g,'full');},3);
+  if(!m.full.length)host.insertAdjacentHTML('beforeend','<div class="own-empty">'+(gp?'この目的のレシピは、いまの手持ちでは作れません。':'いまの手持ちだけで作れる目的別レシピはまだありません。')+'</div>');
+  section('near','あと1本で作れる','次に買う候補に',m.near,function(g){return ownCard(g,'near');},2);
+  var fc=own.length>=2?freeCombos(own,used):[];
+  section('free','手持ちどうしの相性','効果の研究ではなく、香りの組み合わせの目安です',fc,freeCard,3);}
 function renderGoal(){var s=$('goalSel');if(!s.options.length){s.innerHTML='<option value="">目的を選んでください</option>'+P.map(function(p){return '<option value="'+p.id+'">'+GS[p.grade]+' '+esc(p.title)+'</option>';}).join('');s.onchange=function(){st.goal=s.value;renderGoal();renderBottle();};}
-  s.value=st.goal;var out=$('goalRecipes');out.innerHTML='';var p=pById[st.goal];if(!p)return;recipesOf(p).forEach(function(r){out.appendChild(recipeCard(p,r));});}
+  s.value=st.goal;var out=$('goalRecipes');out.innerHTML='';var p=pById[st.goal];if(!p){renderOwn();return;}recipesOf(p).forEach(function(r){out.appendChild(recipeCard(p,r));});renderOwn();}
 /* bottle canvas */
 var REDUCE=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
 function hex2rgb(h){h=h.replace('#','');return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
